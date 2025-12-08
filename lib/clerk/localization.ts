@@ -1,5 +1,4 @@
 import { koKR } from "@clerk/localizations";
-import type { LocalizationResource } from "@clerk/types";
 
 /**
  * @file localization.ts
@@ -16,7 +15,7 @@ import type { LocalizationResource } from "@clerk/types";
  * import { ClerkProvider } from '@clerk/nextjs';
  *
  * <ClerkProvider localization={customKoKR}>
- *   {/* ... */}
+ *   {children}
  * </ClerkProvider>
  * ```
  */

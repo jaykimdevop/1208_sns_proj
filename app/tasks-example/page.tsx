@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useSession, useUser } from "@clerk/nextjs";
+import { useUser } from "@clerk/nextjs";
 import { useClerkSupabaseClient } from "@/lib/supabase/clerk-client";
 
 /**
@@ -17,11 +17,9 @@ export default function TasksPage() {
 
   // useUser()는 Clerk가 사용자 데이터를 로드했는지 확인하는 데 사용됩니다
   const { user, isLoaded: isUserLoaded } = useUser();
-  // useSession()은 Clerk 세션 객체를 가져오는 데 사용됩니다
-  // 세션 객체는 getToken() 메서드를 통해 세션 토큰을 가져오는 데 사용됩니다
-  const { session } = useSession();
 
   // Clerk 세션 토큰을 사용하는 Supabase 클라이언트
+  // useClerkSupabaseClient hook 내부에서 useSession()을 사용합니다
   const supabase = useClerkSupabaseClient();
 
   // 사용자 데이터가 로드된 후 tasks를 가져옵니다

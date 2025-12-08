@@ -20,6 +20,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "SaaS 템플릿",
   description: "Next.js + Clerk + Supabase 보일러플레이트",
+  icons: {
+    icon: "/favicon.ico",
+  },
 };
 
 export default function RootLayout({

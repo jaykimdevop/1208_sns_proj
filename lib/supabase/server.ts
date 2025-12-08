@@ -93,7 +93,7 @@ export function createClerkSupabaseClient(): SupabaseClient {
         // 이 토큰은 Supabase가 Clerk를 서드파티 인증 제공자로 인식하도록 합니다
         const token = await (await auth()).getToken();
         return token ?? null;
-      } catch (error) {
+      } catch {
         // 인증되지 않은 요청의 경우 null 반환
         // 이 경우 RLS 정책에 따라 접근이 제한됩니다
         return null;
