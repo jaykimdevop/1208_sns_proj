@@ -149,7 +149,7 @@
     /* Instagram 기본 폰트 패밀리 적용 */
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   }
-  main {
-    @apply max-w-7xl mx-auto pt-16 px-4;
-  }
+  /* main 요소 전역 스타일 제거: app/(main)/layout.tsx에서 Instagram 레이아웃을 위해 명시적으로 관리 */
+  /* 기존 스타일 (max-w-7xl mx-auto pt-16 px-4)은 Instagram 레이아웃과 충돌하므로 제거됨 */
+  /* 다른 페이지의 main 요소는 각 페이지에서 직접 스타일을 적용해야 함 (예: app/page.tsx) */
 }

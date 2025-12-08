@@ -1,28 +1,27 @@
-- [ ] `.cursor/` 디렉토리
-  - [ ] `rules/` 커서룰
+- [x] `.cursor/` 디렉토리
+  - [x] `rules/` 커서룰
   - [ ] `mcp.json` MCP 서버 설정
   - [ ] `dir.md` 프로젝트 디렉토리 구조
-- [ ] `.github/` 디렉토리
+- [x] `.github/` 디렉토리
 - [ ] `.husky/` 디렉토리
-- [ ] `app/` 디렉토리
-  - [ ] `favicon.ico` 파일
+- [x] `app/` 디렉토리
+  - [x] `favicon.ico` 파일
   - [ ] `not-found.tsx` 파일
   - [ ] `robots.ts` 파일
   - [ ] `sitemap.ts` 파일
   - [ ] `manifest.ts` 파일
-- [ ] `supabase/` 디렉토리
-- [ ] `public/` 디렉토리
-  - [ ] `icons/` 디렉토리
-  - [ ] `logo.png` 파일
-  - [ ] `og-image.png` 파일
-- [ ] `tsconfig.json` 파일
-- [ ] `.cursorignore` 파일
-- [ ] `.gitignore` 파일
-- [ ] `.prettierignore` 파일
-- [ ] `.prettierrc` 파일
-- [ ] `tsconfig.json` 파일
-- [ ] `eslint.config.mjs` 파일
-- [ ] `AGENTS.md` 파일
+- [x] `supabase/` 디렉토리
+- [x] `public/` 디렉토리
+  - [x] `icons/` 디렉토리
+  - [x] `logo.png` 파일
+  - [x] `og-image.png` 파일
+- [x] `tsconfig.json` 파일
+- [x] `.cursorignore` 파일
+- [x] `.gitignore` 파일
+- [x] `.prettierignore` 파일
+- [x] `.prettierrc` 파일
+- [x] `eslint.config.mjs` 파일
+- [x] `AGENTS.md` 파일
 
 # 📋 Mini Instagram - 개발 TODO 리스트
 
@@ -44,6 +43,10 @@
 
 ## 2. 레이아웃 구조
 
+- [x] `app/layout.tsx` 루트 레이아웃 수정
+  - [x] Navbar 제거 (Instagram 앱은 Sidebar 사용)
+  - [x] `/` URL이 Instagram 홈 피드를 가리키도록 구조 변경
+  - [x] 기존 랜딩 페이지는 `/demo`로 이동
 - [x] `app/(main)/layout.tsx` 생성
   - [x] Sidebar 통합
   - [x] 반응형 레이아웃 (Desktop/Tablet/Mobile)
@@ -62,26 +65,29 @@
 
 ## 3. 홈 피드 페이지
 
-- [ ] `app/(main)/page.tsx` 생성
-  - [ ] PostFeed 컴포넌트 통합
-  - [ ] 배경색 #FAFAFA 설정
-- [ ] `components/post/PostCard.tsx`
-  - [ ] 헤더 (프로필 이미지 32px, 사용자명, 시간, ⋯ 메뉴)
-  - [ ] 이미지 영역 (1:1 정사각형)
-  - [ ] 액션 버튼 (좋아요, 댓글, 공유, 북마크)
-  - [ ] 좋아요 수 표시
-  - [ ] 캡션 (사용자명 Bold + 내용, 2줄 초과 시 "... 더 보기")
-  - [ ] 댓글 미리보기 (최신 2개)
-- [ ] `components/post/PostCardSkeleton.tsx`
-  - [ ] 로딩 UI (Skeleton + Shimmer 효과)
-- [ ] `components/post/PostFeed.tsx`
-  - [ ] 게시물 목록 렌더링
-  - [ ] 무한 스크롤 (Intersection Observer)
-  - [ ] 페이지네이션 (10개씩)
-- [ ] `app/api/posts/route.ts`
-  - [ ] GET: 게시물 목록 조회 (시간 역순 정렬)
-  - [ ] 페이지네이션 지원 (limit, offset)
-  - [ ] userId 파라미터 지원 (프로필 페이지용)
+- [x] `app/(main)/page.tsx` 생성
+  - [x] PostFeed 컴포넌트 통합
+  - [x] 배경색 #FAFAFA 설정
+- [x] `components/post/PostCard.tsx`
+  - [x] 헤더 (프로필 이미지 32px, 사용자명, 시간, ⋯ 메뉴)
+  - [x] 이미지 영역 (1:1 정사각형)
+  - [x] 액션 버튼 (좋아요, 댓글, 공유, 북마크)
+  - [x] 좋아요 수 표시
+  - [x] 캡션 (사용자명 Bold + 내용, 2줄 초과 시 "... 더 보기")
+  - [x] 댓글 미리보기 (최신 2개)
+- [x] `components/post/PostCardSkeleton.tsx`
+  - [x] 로딩 UI (Skeleton + Shimmer 효과)
+- [x] `components/post/PostFeed.tsx`
+  - [x] 게시물 목록 렌더링
+  - [x] 무한 스크롤 (Intersection Observer)
+  - [x] 페이지네이션 (10개씩)
+- [x] `app/api/posts/route.ts`
+  - [x] GET: 게시물 목록 조회 (시간 역순 정렬)
+  - [x] 페이지네이션 지원 (limit, offset)
+  - [x] userId 파라미터 지원 (프로필 페이지용)
+  - [x] N+1 쿼리 문제 해결 (배치 쿼리 사용)
+- [x] `lib/utils/formatRelativeTime.ts`
+  - [x] 상대 시간 표시 함수 (방금 전, N분 전, N시간 전 등)
 
 ## 4. 좋아요 기능
 

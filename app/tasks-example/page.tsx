@@ -49,9 +49,9 @@ export default function TasksPage() {
     if (!name.trim()) return;
 
     // tasks 테이블에 새 task 삽입
-    const { error } = await supabase.from("tasks").insert({
+    const { data: newTask, error } = await supabase.from("tasks").insert({
       name,
-    });
+    }).select().single();
 
     if (error) {
       console.error("Error creating task:", error);
@@ -59,9 +59,11 @@ export default function TasksPage() {
       return;
     }
 
-    // 성공 시 폼 초기화 및 목록 새로고침
+    // 성공 시 폼 초기화 및 상태에 새 작업 추가
     setName("");
-    window.location.reload();
+    if (newTask) {
+      setTasks((prev) => [newTask, ...prev]);
+    }
   }
 
   if (!isUserLoaded) {

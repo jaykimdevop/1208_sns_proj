@@ -47,7 +47,7 @@ export function BottomNav() {
   };
 
   return (
-    <nav className="lg:hidden fixed bottom-0 left-0 right-0 h-[50px] bg-white border-t z-50 flex items-center justify-around" style={{ borderColor: 'var(--color-instagram-border)' }}>
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 h-[50px] bg-white border-t z-50 flex items-center justify-around" style={{ borderColor: 'var(--color-instagram-border)' }}>
       {navItems.map((item) => {
         const Icon = item.icon;
         const href = item.href === "/profile" ? getProfileHref() : item.href;

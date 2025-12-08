@@ -29,7 +29,7 @@ export function Header() {
   };
 
   return (
-    <header className="lg:hidden fixed top-0 left-0 right-0 h-[60px] bg-white border-b z-50 flex items-center justify-between px-4" style={{ borderColor: 'var(--color-instagram-border)' }}>
+    <header className="md:hidden fixed top-0 left-0 right-0 h-[60px] bg-white border-b z-50 flex items-center justify-between px-4" style={{ borderColor: 'var(--color-instagram-border)' }}>
       {/* 로고 */}
       <Link href="/" className="text-xl font-bold" style={{ color: 'var(--color-instagram-text-primary)' }}>
         Instagram

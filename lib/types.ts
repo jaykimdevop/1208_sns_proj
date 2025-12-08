@@ -138,7 +138,7 @@ export interface LikeWithUser extends Like {
  * 게시물 목록 조회 응답 타입
  */
 export interface PostsResponse {
-  data: PostWithStats[];
+  data: (PostWithStats & { comments: CommentWithUser[] })[];
   count?: number; // 전체 게시물 수 (페이지네이션용)
   hasMore?: boolean; // 더 많은 게시물이 있는지 여부
 }
