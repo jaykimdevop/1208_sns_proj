@@ -187,26 +187,29 @@
 
 ## Phase 8. 프로필 페이지
 
-- [ ] `app/(main)/profile/[userId]/page.tsx`
-  - [ ] 동적 라우트 생성
-  - [ ] ProfileHeader 통합
-  - [ ] PostGrid 통합
-- [ ] `components/profile/ProfileHeader.tsx`
-  - [ ] 프로필 이미지 (150px Desktop / 90px Mobile)
-  - [ ] 사용자명
-  - [ ] 통계 (게시물 수, 팔로워 수, 팔로잉 수)
-  - [ ] "팔로우" / "팔로잉" 버튼 (다른 사람 프로필)
-  - [ ] "프로필 편집" 버튼 (본인 프로필, 1차 제외)
-- [ ] `components/profile/PostGrid.tsx`
-  - [ ] 3열 그리드 레이아웃 (반응형)
-  - [ ] 1:1 정사각형 썸네일
-  - [ ] Hover 시 좋아요/댓글 수 표시
-  - [ ] 클릭 시 게시물 상세 모달 열기
-- [ ] `app/api/users/[userId]/route.ts`
-  - [ ] GET: 사용자 정보 조회
-  - [ ] user_stats 뷰 활용
-- [ ] Sidebar "프로필" 버튼 연결
-  - [ ] `/profile`로 리다이렉트 (본인 프로필)
+- [x] `app/(main)/profile/[userId]/page.tsx`
+  - [x] 동적 라우트 생성
+  - [x] ProfileHeader 통합
+  - [x] PostGrid 통합
+- [x] `components/profile/profile-header.tsx`
+  - [x] 프로필 이미지 (150px Desktop / 90px Mobile) - 이니셜 아바타
+  - [x] 사용자명
+  - [x] 통계 (게시물 수, 팔로워 수, 팔로잉 수)
+  - [x] "팔로우" / "팔로잉" 버튼 (다른 사람 프로필, Phase 9에서 기능 구현)
+  - [x] "프로필 편집" 버튼 (본인 프로필, 비활성화)
+- [x] `components/profile/post-grid.tsx`
+  - [x] 3열 그리드 레이아웃 (반응형)
+  - [x] 1:1 정사각형 썸네일
+  - [x] Hover 시 좋아요/댓글 수 표시
+  - [x] 클릭 시 게시물 상세 모달 열기 (Desktop) / 상세 페이지 이동 (Mobile)
+- [x] `app/api/users/[userId]/route.ts`
+  - [x] GET: 사용자 정보 조회
+  - [x] user_stats 뷰 활용
+  - [x] Clerk ID 또는 Supabase UUID로 조회 지원
+  - [x] 팔로우 상태 확인 (isFollowing)
+  - [x] 본인 프로필 확인 (isOwnProfile)
+- [x] Sidebar "프로필" 버튼 연결
+  - [x] `/profile/${user.id}`로 이동 (Clerk ID 기반)
 
 ## Phase 9. 팔로우 기능
 

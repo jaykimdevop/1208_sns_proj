@@ -169,6 +169,7 @@ export interface UserResponse {
   user: UserStats;
   isFollowing: boolean; // 현재 사용자가 팔로우 중인지 여부
   isOwnProfile: boolean; // 본인 프로필인지 여부
+  error?: string; // 에러 메시지
 }
 
 /**
