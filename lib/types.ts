@@ -220,6 +220,20 @@ export interface LikeResponse {
   error?: string;
 }
 
+/**
+ * 게시물 생성 API 응답 타입
+ */
+export interface CreatePostResponse {
+  success: boolean;
+  post?: {
+    id: string;
+    image_url: string;
+    caption: string | null;
+    created_at: string;
+  };
+  error?: string;
+}
+
 // ============================================
 // 페이지네이션 타입
 // ============================================

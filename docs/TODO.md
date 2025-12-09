@@ -110,20 +110,29 @@
 
 ## Phase 5. 게시물 작성
 
-- [ ] `components/post/CreatePostModal.tsx`
-  - [ ] Dialog 컴포넌트 사용
-  - [ ] 이미지 미리보기 UI
-  - [ ] 텍스트 입력 필드 (최대 2,200자)
-  - [ ] 파일 선택 버튼
-  - [ ] 업로드 버튼
-- [ ] `app/api/posts/route.ts`
-  - [ ] POST: 게시물 생성
-  - [ ] 이미지 파일 검증 (최대 5MB)
-  - [ ] Supabase Storage 업로드
-  - [ ] posts 테이블에 데이터 저장
-  - [ ] 인증 검증 (Clerk)
-- [ ] Sidebar "만들기" 버튼 연결
-  - [ ] CreatePostModal 열기
+- [x] `components/post/CreatePostModal.tsx`
+  - [x] Dialog 컴포넌트 사용
+  - [x] 이미지 미리보기 UI (1:1 비율)
+  - [x] 드래그앤드롭 지원
+  - [x] 텍스트 입력 필드 (최대 2,200자, 글자 수 카운터)
+  - [x] 파일 선택 버튼
+  - [x] 업로드 버튼 (로딩 상태 포함)
+  - [x] 파일 검증 (크기: 5MB, 타입: JPEG, PNG, WebP, GIF)
+- [x] `app/api/posts/route.ts`
+  - [x] POST: 게시물 생성
+  - [x] 이미지 파일 검증 (최대 5MB)
+  - [x] Supabase Storage 업로드 (경로: `{user_id}/{timestamp}_{random}.{ext}`)
+  - [x] posts 테이블에 데이터 저장
+  - [x] 인증 검증 (Clerk)
+  - [x] 에러 시 업로드된 이미지 롤백
+- [x] `lib/types.ts`
+  - [x] CreatePostResponse 타입 추가
+- [x] Sidebar "만들기" 버튼 연결
+  - [x] CreatePostModal 열기
+  - [x] 게시물 생성 후 홈 피드 새로고침
+- [x] BottomNav "만들기" 버튼 연결
+  - [x] CreatePostModal 열기
+  - [x] 게시물 생성 후 홈 피드 새로고침
 
 ## Phase 6. 댓글 기능
 

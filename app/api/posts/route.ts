@@ -1,21 +1,23 @@
 /**
  * @file route.ts
- * @description 게시물 목록 조회 API
+ * @description 게시물 API (조회 및 생성)
  *
  * GET /api/posts?limit=10&offset=0&userId=xxx (선택적)
+ * POST /api/posts (FormData: image, caption)
  *
  * 기능:
- * 1. post_stats 뷰에서 게시물 조회 (created_at DESC 정렬)
- * 2. users 테이블 조인 (사용자 정보)
- * 3. comments 테이블 조인 (최신 2개, created_at DESC)
- * 4. limit, offset으로 페이지네이션
- * 5. userId 파라미터가 있으면 해당 사용자의 게시물만 필터링
- * 6. 현재 사용자의 좋아요 여부 (isLiked) 포함
+ * 1. GET: post_stats 뷰에서 게시물 조회 (created_at DESC 정렬)
+ * 2. GET: users 테이블 조인 (사용자 정보)
+ * 3. GET: comments 테이블 조인 (최신 2개, created_at DESC)
+ * 4. GET: limit, offset으로 페이지네이션
+ * 5. GET: userId 파라미터가 있으면 해당 사용자의 게시물만 필터링
+ * 6. GET: 현재 사용자의 좋아요 여부 (isLiked) 포함
+ * 7. POST: 이미지 업로드 및 게시물 생성
  *
  * @dependencies
  * - @clerk/nextjs/server: auth()
  * - lib/supabase/server: createClerkSupabaseClient
- * - lib/types: PostWithStats, CommentWithUser, PostsResponse
+ * - lib/types: PostWithStats, CommentWithUser, PostsResponse, CreatePostResponse
  */
 
 import { NextRequest, NextResponse } from "next/server";
@@ -25,7 +27,21 @@ import type {
   PostWithStats,
   CommentWithUser,
   PostsResponse,
+  CreatePostResponse,
 } from "@/lib/types";
+
+// ============================================
+// 상수 정의
+// ============================================
+
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+const ALLOWED_MIME_TYPES = [
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/gif",
+];
+const MAX_CAPTION_LENGTH = 2200;
 
 export async function GET(request: NextRequest) {
   try {
@@ -222,6 +238,147 @@ export async function GET(request: NextRequest) {
     console.error("Unexpected error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
+
+// ============================================
+// POST: 게시물 생성
+// ============================================
+
+export async function POST(request: NextRequest) {
+  try {
+    // 1. Clerk 인증 검증
+    const { userId: clerkUserId } = await auth();
+    if (!clerkUserId) {
+      return NextResponse.json<CreatePostResponse>(
+        { success: false, error: "로그인이 필요합니다." },
+        { status: 401 }
+      );
+    }
+
+    // 2. FormData 파싱
+    const formData = await request.formData();
+    const imageFile = formData.get("image") as File | null;
+    const caption = (formData.get("caption") as string) || "";
+
+    // 3. 이미지 파일 검증
+    if (!imageFile) {
+      return NextResponse.json<CreatePostResponse>(
+        { success: false, error: "이미지를 선택해주세요." },
+        { status: 400 }
+      );
+    }
+
+    if (!ALLOWED_MIME_TYPES.includes(imageFile.type)) {
+      return NextResponse.json<CreatePostResponse>(
+        {
+          success: false,
+          error: "지원하지 않는 이미지 형식입니다. (JPEG, PNG, WebP, GIF만 가능)",
+        },
+        { status: 400 }
+      );
+    }
+
+    if (imageFile.size > MAX_FILE_SIZE) {
+      return NextResponse.json<CreatePostResponse>(
+        { success: false, error: "이미지 크기는 5MB 이하여야 합니다." },
+        { status: 400 }
+      );
+    }
+
+    // 4. 캡션 길이 검증
+    if (caption.length > MAX_CAPTION_LENGTH) {
+      return NextResponse.json<CreatePostResponse>(
+        { success: false, error: `캡션은 ${MAX_CAPTION_LENGTH}자 이하여야 합니다.` },
+        { status: 400 }
+      );
+    }
+
+    // 5. Supabase 클라이언트 생성
+    const supabase = createClerkSupabaseClient();
+
+    // 6. users 테이블에서 clerk_id로 user_id 조회
+    const { data: userData, error: userError } = await supabase
+      .from("users")
+      .select("id")
+      .eq("clerk_id", clerkUserId)
+      .single();
+
+    if (userError || !userData) {
+      console.error("Error fetching user:", userError);
+      return NextResponse.json<CreatePostResponse>(
+        { success: false, error: "사용자 정보를 찾을 수 없습니다." },
+        { status: 404 }
+      );
+    }
+
+    const userId = userData.id;
+
+    // 7. 파일명 생성 (중복 방지)
+    const timestamp = Date.now();
+    const fileExt = imageFile.name.split(".").pop() || "jpg";
+    const fileName = `${userId}/${timestamp}_${Math.random().toString(36).substring(2, 8)}.${fileExt}`;
+
+    // 8. 이미지를 Supabase Storage에 업로드
+    const { data: uploadData, error: uploadError } = await supabase.storage
+      .from("posts")
+      .upload(fileName, imageFile, {
+        contentType: imageFile.type,
+        upsert: false,
+      });
+
+    if (uploadError) {
+      console.error("Error uploading image:", uploadError);
+      return NextResponse.json<CreatePostResponse>(
+        { success: false, error: "이미지 업로드에 실패했습니다." },
+        { status: 500 }
+      );
+    }
+
+    // 9. 업로드된 이미지의 공개 URL 생성
+    const { data: publicUrlData } = supabase.storage
+      .from("posts")
+      .getPublicUrl(uploadData.path);
+
+    const imageUrl = publicUrlData.publicUrl;
+
+    // 10. posts 테이블에 데이터 저장
+    const { data: postData, error: postError } = await supabase
+      .from("posts")
+      .insert({
+        user_id: userId,
+        image_url: imageUrl,
+        caption: caption.trim() || null,
+      })
+      .select("id, image_url, caption, created_at")
+      .single();
+
+    if (postError) {
+      console.error("Error creating post:", postError);
+      // 업로드된 이미지 삭제 시도 (롤백)
+      await supabase.storage.from("posts").remove([uploadData.path]);
+      return NextResponse.json<CreatePostResponse>(
+        { success: false, error: "게시물 생성에 실패했습니다." },
+        { status: 500 }
+      );
+    }
+
+    // 11. 성공 응답
+    return NextResponse.json<CreatePostResponse>({
+      success: true,
+      post: {
+        id: postData.id,
+        image_url: postData.image_url,
+        caption: postData.caption,
+        created_at: postData.created_at,
+      },
+    });
+  } catch (error) {
+    console.error("Unexpected error in POST /api/posts:", error);
+    return NextResponse.json<CreatePostResponse>(
+      { success: false, error: "서버 오류가 발생했습니다." },
       { status: 500 }
     );
   }
