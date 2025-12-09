@@ -36,6 +36,7 @@ interface PostGridProps {
   onLoadMore?: () => void;
   hasMore?: boolean;
   isLoading?: boolean;
+  emptyMessage?: string;
 }
 
 export function PostGrid({
@@ -43,6 +44,7 @@ export function PostGrid({
   onLoadMore,
   hasMore = false,
   isLoading = false,
+  emptyMessage = "아직 게시물이 없습니다.",
 }: PostGridProps) {
   const router = useRouter();
   const [selectedPostIndex, setSelectedPostIndex] = useState<number | null>(null);
@@ -93,7 +95,7 @@ export function PostGrid({
     return count.toString();
   };
 
-  if (posts.length === 0) {
+  if (posts.length === 0 && !isLoading) {
     return (
       <div className="flex flex-col items-center justify-center py-16">
         <div
@@ -112,7 +114,7 @@ export function PostGrid({
           게시물 없음
         </h2>
         <p style={{ color: "var(--color-instagram-text-secondary)" }}>
-          아직 게시물이 없습니다.
+          {emptyMessage}
         </p>
       </div>
     );

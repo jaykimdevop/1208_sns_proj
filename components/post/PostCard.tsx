@@ -29,7 +29,10 @@ import {
   MessageCircle,
   Send,
   Bookmark,
+  BookmarkCheck,
   MoreHorizontal,
+  Trash2,
+  Loader2,
 } from "lucide-react";
 import { formatRelativeTime } from "@/lib/utils/formatRelativeTime";
 import { LikeButton, LikeCount } from "@/components/post/LikeButton";
@@ -37,25 +40,51 @@ import { DoubleTapHeart } from "@/components/post/DoubleTapHeart";
 import { CommentForm, type CommentFormRef } from "@/components/comment/CommentForm";
 import { PostModal } from "@/components/post/post-modal";
 import { checkMediaQuery } from "@/hooks/use-media-query";
-import type { PostWithStats, CommentWithUser, LikeResponse } from "@/lib/types";
+import { toast } from "sonner";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import type { PostWithStats, CommentWithUser, LikeResponse, BookmarkResponse, DeletePostResponse } from "@/lib/types";
 
 interface PostCardProps {
   post: PostWithStats & {
     comments: CommentWithUser[];
     isLiked: boolean;
+    isBookmarked?: boolean;
   };
+  onPostDeleted?: (postId: string) => void;
 }
 
-export function PostCard({ post }: PostCardProps) {
+export function PostCard({ post, onPostDeleted }: PostCardProps) {
   const router = useRouter();
-  const { isSignedIn, isLoaded } = useUser();
+  const { isSignedIn, isLoaded, user } = useUser();
   const [showFullCaption, setShowFullCaption] = useState(false);
   const [liked, setLiked] = useState(post.isLiked);
   const [likesCount, setLikesCount] = useState(post.likes_count || 0);
   const [comments, setComments] = useState<CommentWithUser[]>(post.comments || []);
   const [commentsCount, setCommentsCount] = useState(post.comments_count || 0);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [bookmarked, setBookmarked] = useState(post.isBookmarked || false);
+  const [isBookmarkLoading, setIsBookmarkLoading] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const commentFormRef = useRef<CommentFormRef>(null);
+
+  // 본인 게시물인지 확인
+  const isOwnPost = user?.id === post.user?.clerk_id;
 
   // 캡션이 2줄을 초과하는지 확인 (대략적인 계산)
   const captionLines = post.caption
@@ -129,14 +158,15 @@ export function PostCard({ post }: PostCardProps) {
     const url = `${window.location.origin}/post/${post.post_id}`;
     try {
       await navigator.clipboard.writeText(url);
-      // TODO: 토스트 메시지 표시
+      toast.success("링크가 복사되었습니다");
     } catch (error) {
       console.error("Failed to copy URL:", error);
+      toast.error("링크 복사에 실패했습니다");
     }
   }, [isLoaded, isSignedIn, router, post.post_id]);
 
   // 북마크 버튼 클릭 핸들러
-  const handleBookmarkClick = useCallback(() => {
+  const handleBookmarkClick = useCallback(async () => {
     // Clerk이 로드되지 않았으면 무시
     if (!isLoaded) return;
     // 로그인되지 않았으면 로그인 페이지로 이동
@@ -144,8 +174,41 @@ export function PostCard({ post }: PostCardProps) {
       router.push("/sign-in");
       return;
     }
-    // TODO: 북마크 기능 구현
-  }, [isLoaded, isSignedIn, router]);
+    // 이미 로딩 중이면 무시
+    if (isBookmarkLoading) return;
+
+    // Optimistic UI 업데이트
+    const prevBookmarked = bookmarked;
+    setBookmarked(!bookmarked);
+    setIsBookmarkLoading(true);
+
+    try {
+      const response = await fetch("/api/bookmarks", {
+        method: bookmarked ? "DELETE" : "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ post_id: post.post_id }),
+      });
+
+      const data: BookmarkResponse = await response.json();
+
+      if (!data.success) {
+        // API 실패 시 롤백
+        setBookmarked(prevBookmarked);
+        toast.error(data.error || "북마크 처리에 실패했습니다");
+      } else {
+        toast.success(data.isBookmarked ? "게시물을 저장했습니다" : "저장 목록에서 삭제했습니다");
+      }
+    } catch (error) {
+      // 네트워크 에러 시 롤백
+      setBookmarked(prevBookmarked);
+      toast.error("북마크 처리에 실패했습니다");
+      console.error("Bookmark request failed:", error);
+    } finally {
+      setIsBookmarkLoading(false);
+    }
+  }, [isLoaded, isSignedIn, router, bookmarked, isBookmarkLoading, post.post_id]);
 
   // 게시물 상세 열기 핸들러 (Desktop: 모달, Mobile: 라우트 이동)
   const handleOpenDetail = useCallback(() => {
@@ -157,6 +220,36 @@ export function PostCard({ post }: PostCardProps) {
       router.push(`/post/${post.post_id}`);
     }
   }, [router, post.post_id]);
+
+  // 게시물 삭제 핸들러
+  const handleDeletePost = useCallback(async () => {
+    if (isDeleting) return;
+    setIsDeleting(true);
+
+    try {
+      const response = await fetch(`/api/posts/${post.post_id}`, {
+        method: "DELETE",
+      });
+
+      const data: DeletePostResponse = await response.json();
+
+      if (data.success) {
+        toast.success("게시물이 삭제되었습니다");
+        setIsDeleteDialogOpen(false);
+        // 부모 컴포넌트에 삭제 알림
+        onPostDeleted?.(post.post_id);
+        // 홈으로 이동 (프로필 페이지에서 삭제한 경우)
+        router.refresh();
+      } else {
+        toast.error(data.error || "게시물 삭제에 실패했습니다");
+      }
+    } catch (error) {
+      console.error("게시물 삭제 실패:", error);
+      toast.error("게시물 삭제에 실패했습니다");
+    } finally {
+      setIsDeleting(false);
+    }
+  }, [isDeleting, post.post_id, onPostDeleted, router]);
 
   // 현재 게시물 데이터 (모달에 전달용)
   const currentPostData = {
@@ -175,6 +268,36 @@ export function PostCard({ post }: PostCardProps) {
       open={isModalOpen}
       onOpenChange={setIsModalOpen}
     />
+
+    {/* 삭제 확인 다이얼로그 */}
+    <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>게시물을 삭제하시겠습니까?</AlertDialogTitle>
+          <AlertDialogDescription>
+            이 작업은 되돌릴 수 없습니다. 게시물과 관련된 모든 댓글, 좋아요가 함께 삭제됩니다.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel disabled={isDeleting}>취소</AlertDialogCancel>
+          <AlertDialogAction
+            onClick={handleDeletePost}
+            disabled={isDeleting}
+            className="bg-red-500 hover:bg-red-600 focus:ring-red-500"
+          >
+            {isDeleting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                삭제 중...
+              </>
+            ) : (
+              "삭제"
+            )}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+
     <article className="bg-white rounded-lg border mb-6" style={{ borderColor: 'var(--color-instagram-border)' }}>
       {/* 헤더 영역 (60px) */}
       <header className="flex items-center justify-between px-4 h-[60px] border-b" style={{ borderColor: 'var(--color-instagram-border)' }}>
@@ -208,15 +331,39 @@ export function PostCard({ post }: PostCardProps) {
           </span>
         </div>
         {/* 메뉴 버튼 */}
-        <button
-          className="p-1 hover:opacity-70 transition-opacity"
-          aria-label="더보기"
-        >
-          <MoreHorizontal
-            size={20}
-            style={{ color: 'var(--color-instagram-text-primary)' }}
-          />
-        </button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              className="p-1 hover:opacity-70 transition-opacity"
+              aria-label="더보기"
+            >
+              <MoreHorizontal
+                size={20}
+                style={{ color: 'var(--color-instagram-text-primary)' }}
+              />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            {isOwnPost && (
+              <DropdownMenuItem
+                className="text-red-500 focus:text-red-500 cursor-pointer"
+                onClick={() => setIsDeleteDialogOpen(true)}
+              >
+                <Trash2 className="mr-2 h-4 w-4" />
+                삭제
+              </DropdownMenuItem>
+            )}
+            {!isOwnPost && (
+              <DropdownMenuItem
+                className="cursor-pointer"
+                onClick={handleShareClick}
+              >
+                <Send className="mr-2 h-4 w-4" />
+                공유
+              </DropdownMenuItem>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
       </header>
 
       {/* 이미지 영역 (1:1 정사각형) - 더블탭 좋아요, 클릭 시 상세 열기 */}
@@ -275,13 +422,22 @@ export function PostCard({ post }: PostCardProps) {
         {/* 북마크 버튼 */}
         <button
           onClick={handleBookmarkClick}
-          className="hover:opacity-70 transition-opacity"
-          aria-label="저장"
+          className="hover:opacity-70 transition-opacity disabled:opacity-50"
+          aria-label={bookmarked ? "저장 취소" : "저장"}
+          disabled={isBookmarkLoading}
         >
-          <Bookmark
-            size={24}
-            style={{ color: 'var(--color-instagram-text-primary)' }}
-          />
+          {bookmarked ? (
+            <BookmarkCheck
+              size={24}
+              style={{ color: 'var(--color-instagram-text-primary)' }}
+              fill="currentColor"
+            />
+          ) : (
+            <Bookmark
+              size={24}
+              style={{ color: 'var(--color-instagram-text-primary)' }}
+            />
+          )}
         </button>
       </div>
 

@@ -70,7 +70,6 @@ export function PostModal({
   const [likesCount, setLikesCount] = useState(post.likes_count || 0);
   const [comments, setComments] = useState<CommentWithUser[]>(post.comments || []);
   const [replyTo, setReplyTo] = useState<CommentWithUser | null>(null);
-  const [isLoadingComments, setIsLoadingComments] = useState(false);
   const commentFormRef = useRef<CommentFormRef>(null);
 
   // 모달이 열릴 때 전체 댓글을 API로 가져오기
@@ -78,7 +77,6 @@ export function PostModal({
     if (!open) return;
 
     const fetchComments = async () => {
-      setIsLoadingComments(true);
       try {
         const response = await fetch(`/api/comments?post_id=${post.post_id}`);
         const data: ThreadedCommentsResponse = await response.json();
@@ -96,8 +94,6 @@ export function PostModal({
         }
       } catch (error) {
         console.error("Error fetching comments:", error);
-      } finally {
-        setIsLoadingComments(false);
       }
     };
 

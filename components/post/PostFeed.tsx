@@ -38,6 +38,14 @@ export function PostFeed({ initialPosts, userId }: PostFeedProps) {
   const [isInitialized, setIsInitialized] = useState(false);
   const observerTarget = useRef<HTMLDivElement>(null);
 
+  // 게시물 삭제 핸들러
+  const handlePostDeleted = useCallback(
+    (postId: string) => {
+      setPosts((prev) => prev.filter((p) => p.post_id !== postId));
+    },
+    [setPosts]
+  );
+
   // 초기 데이터로 전역 상태 초기화 (한 번만)
   useEffect(() => {
     if (!isInitialized && initialPosts?.data) {
@@ -132,7 +140,7 @@ export function PostFeed({ initialPosts, userId }: PostFeedProps) {
       )}
 
       {posts.map((post) => (
-        <PostCard key={post.post_id} post={post} />
+        <PostCard key={post.post_id} post={post} onPostDeleted={handlePostDeleted} />
       ))}
 
       {/* 초기 로딩 스켈레톤 */}

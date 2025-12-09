@@ -19,6 +19,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 
 import { SyncUserProvider } from "@/components/providers/sync-user-provider";
 import { customKoKR } from "@/lib/clerk/localization";
+import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -59,6 +60,7 @@ export default function RootLayout({
           <SyncUserProvider>
             {children}
           </SyncUserProvider>
+          <Toaster position="bottom-center" />
         </body>
       </html>
     </ClerkProvider>

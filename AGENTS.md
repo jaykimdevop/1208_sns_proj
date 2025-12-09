@@ -349,6 +349,52 @@ const searchParams = await props.searchParams;
 - `components/post/LikeButton.tsx`: `isSignedIn` 체크 후 로그인 유도
 - `components/profile/follow-button.tsx`: `isSignedIn` 체크 후 로그인 유도
 
+### 게시물 관리 기능 (Phase 10)
+
+게시물의 공유, 북마크, 삭제 기능을 제공합니다.
+
+#### 공유 기능
+
+- 공유 버튼 클릭 시 게시물 URL을 클립보드에 복사
+- Sonner 토스트로 복사 성공/실패 피드백
+- 미로그인 시 로그인 페이지로 리다이렉트
+
+#### 북마크 기능
+
+- **DB 테이블**: `bookmarks` (user_id, post_id)
+- **API**: `app/api/bookmarks/route.ts`
+  - GET: 북마크된 게시물 목록 조회
+  - POST: 북마크 추가
+  - DELETE: 북마크 제거
+- **UI**: 빈 북마크 아이콘 ↔ 채워진 북마크 아이콘
+- Optimistic UI 업데이트
+
+#### 저장된 게시물 보기
+
+- 프로필 페이지에 "저장됨" 탭 추가 (본인 프로필에서만 표시)
+- `GET /api/bookmarks` API로 북마크 목록 조회
+- PostGrid 컴포넌트 재사용
+- 무한 스크롤 지원
+
+#### 게시물 삭제 기능
+
+- **API**: `app/api/posts/[postId]/route.ts`
+  - DELETE: 본인 게시물만 삭제 가능
+  - Supabase Storage에서 이미지 삭제
+  - CASCADE로 관련 데이터 삭제 (likes, comments, bookmarks)
+- **UI**: PostCard ⋯ 메뉴에 DropdownMenu 추가
+  - 본인 게시물: 삭제 옵션 표시
+  - 타인 게시물: 공유 옵션 표시
+- AlertDialog로 삭제 확인
+- 삭제 후 Jotai postsAtom에서 제거
+
+#### 타입 정의 (`lib/types.ts`)
+
+- `Bookmark`: 북마크 타입
+- `BookmarkRequest`: 북마크 API 요청 타입
+- `BookmarkResponse`: 북마크 API 응답 타입
+- `DeletePostResponse`: 게시물 삭제 API 응답 타입
+
 ## Additional Cursor Rules
 
 프로젝트에는 다음 Cursor 규칙들이 있습니다:

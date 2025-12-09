@@ -259,16 +259,30 @@
   - [x] Sidebar: 홈, 검색, 만들기, 프로필 (로그인) / 홈, 검색, 로그인 (미로그인)
   - [x] Header: 로고 + 프로필 아이콘 (로그인) / 로고 + 로그인 버튼 (미로그인)
 
-## Phase 10. 게시물 삭제
+## Phase 10. 게시물 관리 기능
 
-- [ ] `app/api/posts/[postId]/route.ts`
-  - [ ] DELETE: 게시물 삭제
-  - [ ] 본인만 삭제 가능 (인증 검증)
-  - [ ] Supabase Storage에서 이미지 삭제
-- [ ] PostCard ⋯ 메뉴
-  - [ ] 본인 게시물만 삭제 옵션 표시
-  - [ ] 삭제 확인 다이얼로그
-  - [ ] 삭제 후 피드에서 제거
+- [x] 공유 기능 완성
+  - [x] Sonner (Toast) 컴포넌트 설치 (shadcn/ui)
+  - [x] 클립보드 복사 성공 시 토스트 메시지 표시
+- [x] 북마크 기능
+  - [x] DB 마이그레이션: `bookmarks` 테이블 생성
+  - [x] `app/api/bookmarks/route.ts` 생성 (POST, DELETE, GET)
+  - [x] 북마크 상태 UI 표시 (빈 아이콘 ↔ 채워진 아이콘)
+  - [x] Optimistic UI 업데이트
+  - [x] 게시물 조회 시 북마크 상태 포함
+- [x] 저장된 게시물 보기
+  - [x] `GET /api/bookmarks` API 추가 (북마크 목록 조회)
+  - [x] 프로필 페이지에 "저장됨" 탭 추가 (본인 프로필에서만)
+  - [x] 저장된 게시물 그리드 표시
+  - [x] 무한 스크롤 지원
+- [x] 게시물 삭제
+  - [x] `app/api/posts/[postId]/route.ts` 생성
+  - [x] DELETE: 본인만 삭제 가능 (인증 검증)
+  - [x] Supabase Storage에서 이미지 삭제
+  - [x] PostCard ⋯ 메뉴에 DropdownMenu 추가
+  - [x] 본인 게시물만 삭제 옵션 표시
+  - [x] 삭제 확인 다이얼로그 (AlertDialog)
+  - [x] 삭제 후 피드에서 제거 (Jotai atom 업데이트)
 
 ## Phase 11. 반응형 및 애니메이션
 

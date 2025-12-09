@@ -68,6 +68,16 @@ export interface Follow {
   created_at: string; // ISO 8601 timestamp
 }
 
+/**
+ * 북마크 타입
+ */
+export interface Bookmark {
+  id: string; // UUID
+  user_id: string; // Clerk User ID
+  post_id: string; // UUID (posts.id 참조)
+  created_at: string; // ISO 8601 timestamp
+}
+
 // ============================================
 // 뷰 기반 타입
 // ============================================
@@ -148,7 +158,7 @@ export interface LikeWithUser extends Like {
  * 게시물 목록 조회 응답 타입
  */
 export interface PostsResponse {
-  data: (PostWithStats & { comments: CommentWithUser[]; isLiked: boolean })[];
+  data: (PostWithStats & { comments: CommentWithUser[]; isLiked: boolean; isBookmarked?: boolean })[];
   count?: number; // 전체 게시물 수 (페이지네이션용)
   hasMore?: boolean; // 더 많은 게시물이 있는지 여부
 }
@@ -287,6 +297,30 @@ export interface DeleteCommentResponse {
 export interface FollowResponse {
   success: boolean;
   isFollowing: boolean;
+  error?: string;
+}
+
+/**
+ * 북마크 API 요청 타입
+ */
+export interface BookmarkRequest {
+  post_id: string;
+}
+
+/**
+ * 북마크 API 응답 타입
+ */
+export interface BookmarkResponse {
+  success: boolean;
+  isBookmarked: boolean;
+  error?: string;
+}
+
+/**
+ * 게시물 삭제 API 응답 타입
+ */
+export interface DeletePostResponse {
+  success: boolean;
   error?: string;
 }
 

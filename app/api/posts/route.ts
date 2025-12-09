@@ -182,6 +182,20 @@ export async function GET(request: NextRequest) {
       }
     }
 
+    // 현재 사용자의 북마크 여부 조회
+    let bookmarkedPostIds = new Set<string>();
+    if (clerkUserId) {
+      const { data: userBookmarks } = await supabase
+        .from("bookmarks")
+        .select("post_id")
+        .eq("user_id", clerkUserId)
+        .in("post_id", postIds);
+
+      if (userBookmarks) {
+        bookmarkedPostIds = new Set(userBookmarks.map((bookmark: any) => bookmark.post_id));
+      }
+    }
+
     // 게시물 데이터 형식 변환
     const postsWithComments = postsData.map((post: any) => {
       const postComments = commentsByPostId.get(post.post_id) || [];
@@ -209,6 +223,7 @@ export async function GET(request: NextRequest) {
         user: usersMap.get(post.user_id) || null,
         comments: formattedComments,
         isLiked: likedPostIds.has(post.post_id),
+        isBookmarked: bookmarkedPostIds.has(post.post_id),
       };
     });
 
@@ -216,6 +231,7 @@ export async function GET(request: NextRequest) {
     const formattedPosts: (PostWithStats & {
       comments: CommentWithUser[];
       isLiked: boolean;
+      isBookmarked: boolean;
     })[] = postsWithComments.map((post) => ({
       post_id: post.post_id,
       user_id: post.user_id,
@@ -227,6 +243,7 @@ export async function GET(request: NextRequest) {
       user: post.user,
       comments: post.comments,
       isLiked: post.isLiked,
+      isBookmarked: post.isBookmarked,
     }));
 
     const hasMore = count ? offset + limit < count : false;
