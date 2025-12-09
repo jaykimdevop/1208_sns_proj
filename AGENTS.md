@@ -395,6 +395,78 @@ const searchParams = await props.searchParams;
 - `BookmarkResponse`: 북마크 API 응답 타입
 - `DeletePostResponse`: 게시물 삭제 API 응답 타입
 
+### 반응형 및 애니메이션 (Phase 11)
+
+귀여운 손그림 스타일 UI와 애니메이션을 제공합니다.
+
+#### 커스텀 폰트 및 테마
+
+- **폰트**: SchoolSafeBoardMarker 웹폰트 (손글씨 스타일)
+- **앱 이름**: Instasketch (✏️ 이모지 포함)
+- **컬러 팔레트**: 파스텔톤 (cute-pink, cute-peach, cute-mint, cute-lavender, cute-sky, cute-yellow, cute-coral)
+
+#### 손그림 스타일 CSS 클래스 (`app/globals.css`)
+
+- `.sketch-border`: 기본 손그림 테두리
+- `.sketch-card`: 카드 전용 손그림 스타일 (hover 시 떠오르는 효과)
+- `.sketch-button`: 버튼 전용 손그림 스타일
+- `.sketch-input`: 입력 필드 손그림 스타일
+- `.sketch-avatar`: 프로필 이미지 손그림 테두리
+- `.sketch-modal`: 모달 손그림 스타일
+
+#### 애니메이션 클래스
+
+- **페이지 전환**: `.animate-fade-in`, `.animate-slide-up`, `.animate-slide-down`, `.animate-bounce-in`
+- **Shimmer 효과**: `.animate-shimmer`, `.animate-shimmer-cute`
+- **마이크로 인터랙션**: `.hover-scale`, `.hover-wiggle`, `.heart-pulse`, `.icon-bounce`
+- **탭 효과**: `.tab-underline`
+- **반응형 전환**: `.sidebar-transition`, `.animate-slide-in-top`, `.animate-slide-in-bottom`
+- **Stagger 애니메이션**: `.stagger-1` ~ `.stagger-12`
+
+#### 스켈레톤 컴포넌트
+
+- `components/post/PostCardSkeleton.tsx`: 게시물 카드 로딩 스켈레톤
+- `components/profile/ProfileSkeleton.tsx`: 프로필 페이지 로딩 스켈레톤
+- `components/post/PostModalSkeleton.tsx`: 모달 로딩 스켈레톤
+
+#### UI 적용 컴포넌트
+
+- `components/post/PostCard.tsx`: 손그림 카드 스타일
+- `components/profile/profile-header.tsx`: 귀여운 프로필 헤더
+- `components/comment/CommentForm.tsx`: 손그림 입력 필드
+- `components/layout/Sidebar.tsx`: 손그림 네비게이션 (동적 하이라이트)
+- `components/layout/Header.tsx`: 손그림 헤더
+- `components/layout/BottomNav.tsx`: 손그림 하단 네비게이션 (동적 하이라이트)
+
+#### 네비게이션 동적 하이라이트
+
+사이드바와 하단 네비게이션 메뉴에 마우스 호버 시 동적 하이라이트 효과:
+
+- **호버 효과**: 핑크-피치 그라데이션 배경 (`linear-gradient(135deg, cute-pink, cute-peach)`)
+- **활성 상태**: 민트-스카이 그라데이션 배경 (`linear-gradient(135deg, cute-mint, cute-sky)`)
+- **아이콘 애니메이션**: 확대(1.15배) + 회전(-5도) 효과
+- **텍스트 애니메이션**: 오른쪽으로 4px 이동
+- **만들기 버튼**: 코랄-피치 그라데이션 배경
+
+#### 프로필 통계 레이아웃
+
+프로필 페이지의 통계 표시 방식:
+
+- **세로 레이아웃**: 숫자 (크게, bold) + 줄바꿈 + 레이블 (작게)
+- **Desktop**: `text-2xl font-bold` 숫자, `text-sm` 레이블
+- **Mobile**: `text-xl font-bold` 숫자, `text-xs` 레이블
+- **레이블 줄바꿈 방지**: `whitespace-nowrap` 적용
+
+#### 프로필 탭 스타일
+
+프로필 페이지의 게시물/저장됨 탭:
+
+- **CSS 클래스**: `.profile-tab`, `.profile-tab-active`
+- **아이콘 크기**: 20px (기존 12px에서 증가)
+- **텍스트 크기**: `text-sm` (기존 `text-xs`에서 증가)
+- **탭-컨텐츠 간격**: `pt-6` 추가
+- **활성 탭 언더라인**: 하단 3px 바 표시
+
 ## Additional Cursor Rules
 
 프로젝트에는 다음 Cursor 규칙들이 있습니다:

@@ -345,3 +345,45 @@ export interface PaginatedResponse<T> {
   hasMore: boolean; // 더 많은 항목이 있는지 여부
 }
 
+// ============================================
+// 검색 관련 타입
+// ============================================
+
+/**
+ * 검색된 사용자 결과 타입
+ */
+export interface SearchUserResult {
+  user_id: string;
+  clerk_id: string;
+  name: string;
+  posts_count: number;
+  followers_count: number;
+  following_count: number;
+}
+
+/**
+ * 검색된 게시물 결과 타입
+ */
+export interface SearchPostResult {
+  post_id: string;
+  user_id: string;
+  image_url: string;
+  caption: string | null;
+  created_at: string;
+  likes_count: number;
+  comments_count: number;
+  user: User;
+}
+
+/**
+ * 검색 API 응답 타입
+ */
+export interface SearchResponse {
+  success: boolean;
+  users: SearchUserResult[];
+  posts: SearchPostResult[];
+  users_count: number;
+  posts_count: number;
+  error?: string;
+}
+

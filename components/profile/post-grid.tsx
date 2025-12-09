@@ -128,7 +128,12 @@ export function PostGrid({
           <button
             key={post.post_id}
             onClick={() => handlePostClick(index)}
-            className="relative aspect-square group overflow-hidden bg-gray-100"
+            className="relative aspect-square group overflow-hidden sketch-card hover-scale"
+            style={{
+              opacity: 0,
+              animation: `slide-up 0.4s ease-out forwards`,
+              animationDelay: `${(index % 12) * 0.05}s`,
+            }}
           >
             {/* 썸네일 이미지 */}
             <Image
@@ -161,13 +166,13 @@ export function PostGrid({
           <button
             onClick={onLoadMore}
             disabled={isLoading}
-            className="px-6 py-2 rounded-lg font-semibold transition-colors"
+            className="px-6 py-2 sketch-button font-semibold transition-all"
             style={{
-              backgroundColor: "var(--color-instagram-primary)",
-              color: "white",
+              backgroundColor: "var(--color-cute-pink)",
+              color: "var(--color-cute-border)",
             }}
           >
-            {isLoading ? "로딩 중..." : "더 보기"}
+            {isLoading ? "로딩 중..." : "더 보기 ✨"}
           </button>
         </div>
       )}

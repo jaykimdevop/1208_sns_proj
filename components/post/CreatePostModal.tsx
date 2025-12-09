@@ -273,19 +273,21 @@ export function CreatePostModal({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className="sm:max-w-[500px] p-0 gap-0 overflow-hidden"
-        style={{ backgroundColor: "var(--color-instagram-bg)" }}
+        className="sm:max-w-[500px] p-0 gap-0 overflow-hidden sketch-modal animate-bounce-in"
+        style={{ 
+          background: "linear-gradient(180deg, #FFF5F5 0%, #FFFFFF 100%)",
+        }}
       >
         {/* 헤더 */}
         <DialogHeader
-          className="px-4 py-3 border-b"
-          style={{ borderColor: "var(--color-instagram-border)" }}
+          className="px-4 py-4 border-b-4 border-dashed"
+          style={{ borderColor: "var(--color-cute-border)" }}
         >
           <DialogTitle
-            className="text-center font-semibold"
-            style={{ color: "var(--color-instagram-text-primary)" }}
+            className="text-center text-xl font-bold"
+            style={{ color: "var(--color-cute-border)" }}
           >
-            새 게시물 만들기
+            ✏️ 새 게시물 만들기
           </DialogTitle>
           <DialogDescription className="sr-only">
             이미지를 선택하고 캡션을 입력하여 새 게시물을 작성하세요.
@@ -298,8 +300,10 @@ export function CreatePostModal({
           {!previewUrl ? (
             // 이미지 미선택 시: 드래그앤드롭 영역
             <div
-              className={`aspect-square flex flex-col items-center justify-center gap-4 transition-colors cursor-pointer ${
-                isDragging ? "bg-blue-50" : "bg-gray-50"
+              className={`aspect-square flex flex-col items-center justify-center gap-4 transition-all cursor-pointer m-4 rounded-2xl border-4 border-dashed ${
+                isDragging 
+                  ? "border-[var(--color-cute-mint)] bg-[var(--color-cute-mint)]/20" 
+                  : "border-[var(--color-cute-border)] bg-[var(--color-cute-peach)]/10 hover:bg-[var(--color-cute-pink)]/20"
               }`}
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
@@ -308,21 +312,24 @@ export function CreatePostModal({
             >
               <ImagePlus
                 size={64}
-                className={`transition-colors ${
+                className={`transition-all ${
                   isDragging
-                    ? "text-blue-500"
-                    : "text-gray-400"
+                    ? "text-[var(--color-cute-mint)]"
+                    : "text-[var(--color-cute-border)]"
                 }`}
+                style={{
+                  filter: isDragging ? "none" : "drop-shadow(2px 2px 0 rgba(0,0,0,0.1))",
+                }}
               />
               <div className="text-center">
                 <p
-                  className="text-lg font-medium"
-                  style={{ color: "var(--color-instagram-text-primary)" }}
+                  className="text-lg font-bold"
+                  style={{ color: "var(--color-cute-border)" }}
                 >
-                  사진을 여기에 끌어다 놓으세요
+                  📸 사진을 여기에 끌어다 놓으세요
                 </p>
                 <p
-                  className="text-sm mt-1"
+                  className="text-sm mt-2"
                   style={{ color: "var(--color-instagram-text-secondary)" }}
                 >
                   또는 클릭하여 선택
@@ -330,14 +337,16 @@ export function CreatePostModal({
               </div>
               <button
                 type="button"
-                className="px-4 py-2 rounded-lg font-semibold text-white transition-opacity hover:opacity-90"
-                style={{ backgroundColor: "var(--color-instagram-primary)" }}
+                className="sketch-button px-6 py-3 font-bold text-white transition-all hover:scale-105"
+                style={{ 
+                  background: "linear-gradient(135deg, var(--color-cute-pink) 0%, var(--color-cute-coral) 100%)",
+                }}
                 onClick={(e) => {
                   e.stopPropagation();
                   fileInputRef.current?.click();
                 }}
               >
-                컴퓨터에서 선택
+                💾 컴퓨터에서 선택
               </button>
               <input
                 ref={fileInputRef}
@@ -349,21 +358,25 @@ export function CreatePostModal({
             </div>
           ) : (
             // 이미지 선택 시: 미리보기
-            <div className="relative aspect-square bg-black">
+            <div className="relative aspect-square m-4 rounded-2xl overflow-hidden border-4 border-[var(--color-cute-border)]" style={{ boxShadow: "4px 4px 0 rgba(0,0,0,0.15)" }}>
               <Image
                 src={previewUrl}
                 alt="미리보기"
                 fill
-                className="object-contain"
+                className="object-contain bg-black"
                 unoptimized
               />
               <button
                 type="button"
                 onClick={handleRemoveImage}
-                className="absolute top-2 right-2 p-1.5 rounded-full bg-black/60 text-white hover:bg-black/80 transition-colors"
+                className="absolute top-3 right-3 p-2 rounded-full transition-all hover:scale-110"
+                style={{ 
+                  background: "linear-gradient(135deg, var(--color-cute-coral) 0%, var(--color-cute-pink) 100%)",
+                  boxShadow: "2px 2px 0 rgba(0,0,0,0.2)",
+                }}
                 aria-label="이미지 제거"
               >
-                <X size={20} />
+                <X size={20} className="text-white" />
               </button>
             </div>
           )}
@@ -371,22 +384,21 @@ export function CreatePostModal({
           {/* 캡션 입력 영역 */}
           {previewUrl && (
             <div
-              className="p-4 border-t"
-              style={{ borderColor: "var(--color-instagram-border)" }}
+              className="px-4 pb-4"
             >
               <textarea
                 value={caption}
                 onChange={(e) => setCaption(e.target.value.slice(0, MAX_CAPTION_LENGTH))}
-                placeholder="문구 입력..."
-                className="w-full h-24 resize-none border-none outline-none text-sm"
+                placeholder="✍️ 문구 입력..."
+                className="sketch-input w-full h-24 resize-none p-3 text-sm"
                 style={{
-                  color: "var(--color-instagram-text-primary)",
-                  backgroundColor: "transparent",
+                  color: "var(--color-cute-border)",
+                  backgroundColor: "rgba(255,255,255,0.8)",
                 }}
                 maxLength={MAX_CAPTION_LENGTH}
               />
               <div
-                className="text-xs text-right"
+                className="text-xs text-right mt-1 font-semibold"
                 style={{ color: "var(--color-instagram-text-secondary)" }}
               >
                 {caption.length}/{MAX_CAPTION_LENGTH}
@@ -397,33 +409,36 @@ export function CreatePostModal({
           {/* 에러 메시지 */}
           {error && (
             <div
-              className="px-4 py-2 text-sm text-center"
-              style={{ color: "var(--color-instagram-like)" }}
+              className="mx-4 mb-4 px-4 py-3 text-sm text-center rounded-xl font-semibold"
+              style={{ 
+                color: "var(--color-cute-coral)",
+                background: "rgba(255, 180, 162, 0.2)",
+                border: "2px solid var(--color-cute-coral)",
+              }}
             >
-              {error}
+              ⚠️ {error}
             </div>
           )}
 
           {/* 공유 버튼 */}
           {previewUrl && (
-            <div
-              className="p-4 border-t"
-              style={{ borderColor: "var(--color-instagram-border)" }}
-            >
+            <div className="px-4 pb-4">
               <button
                 type="button"
                 onClick={handleSubmit}
                 disabled={isUploading || !selectedFile}
-                className="w-full py-2.5 rounded-lg font-semibold text-white transition-opacity disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                style={{ backgroundColor: "var(--color-instagram-primary)" }}
+                className="sketch-button w-full py-3 font-bold text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 hover:scale-[1.02]"
+                style={{ 
+                  background: "linear-gradient(135deg, var(--color-cute-mint) 0%, var(--color-cute-sky) 100%)",
+                }}
               >
                 {isUploading ? (
                   <>
-                    <Loader2 size={18} className="animate-spin" />
+                    <Loader2 size={20} className="animate-spin" />
                     업로드 중...
                   </>
                 ) : (
-                  "공유"
+                  "🚀 공유하기"
                 )}
               </button>
             </div>

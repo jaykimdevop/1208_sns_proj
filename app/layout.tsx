@@ -33,11 +33,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Mini Instagram",
-  description: "Instagram Clone SNS - Next.js + Clerk + Supabase",
-  icons: {
-    icon: "/favicon.ico",
-  },
+  title: "✏️ Instasketch",
+  description: "귀여운 손그림 스타일 SNS - Next.js + Clerk + Supabase",
 };
 
 export default function RootLayout({
@@ -57,6 +54,26 @@ export default function RootLayout({
         <body
           className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         >
+          {/* SVG 필터 정의 (손그림 테두리 효과용) */}
+          <svg className="absolute w-0 h-0" aria-hidden="true">
+            <defs>
+              <filter id="sketch-filter">
+                <feTurbulence
+                  type="fractalNoise"
+                  baseFrequency="0.04"
+                  numOctaves="5"
+                  result="noise"
+                />
+                <feDisplacementMap
+                  in="SourceGraphic"
+                  in2="noise"
+                  scale="2"
+                  xChannelSelector="R"
+                  yChannelSelector="G"
+                />
+              </filter>
+            </defs>
+          </svg>
           <SyncUserProvider>
             {children}
           </SyncUserProvider>

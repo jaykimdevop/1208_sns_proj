@@ -156,9 +156,11 @@ function PostFeedWrapper() {
   return (
     <Suspense
       fallback={
-        <div className="py-8">
+        <div className="py-8 animate-fade-in">
           {[...Array(3)].map((_, i) => (
-            <PostCardSkeleton key={i} />
+            <div key={i} className={`stagger-${i + 1}`} style={{ opacity: 0, animation: `slide-up 0.5s ease-out forwards`, animationDelay: `${i * 0.1}s` }}>
+              <PostCardSkeleton />
+            </div>
           ))}
         </div>
       }
@@ -176,6 +178,11 @@ async function PostFeedContent() {
 
 export default function HomePage() {
   // 레이아웃에서 이미 스타일링을 처리하므로 PostFeedWrapper만 반환
-  return <PostFeedWrapper />;
+  // 페이지 진입 시 fade-in 애니메이션 적용
+  return (
+    <div className="animate-fade-in">
+      <PostFeedWrapper />
+    </div>
+  );
 }
 

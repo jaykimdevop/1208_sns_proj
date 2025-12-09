@@ -3,6 +3,17 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* ========================================
+   귀여운 손그림 스타일 웹폰트
+   ======================================== */
+@font-face {
+  font-family: 'SchoolSafeBoardMarker';
+  src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/2511-1@1.0/HakgyoansimBoadmarkerR.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -60,6 +71,16 @@
   --font-weight-instagram-normal: 400;
   --font-weight-instagram-semibold: 600;
   --font-weight-instagram-bold: 700;
+
+  /* 귀여운 파스텔 컬러 팔레트 */
+  --color-cute-pink: #FFB5C5;
+  --color-cute-peach: #FFDAB9;
+  --color-cute-mint: #B5EAD7;
+  --color-cute-lavender: #E0BBE4;
+  --color-cute-sky: #BFEFFF;
+  --color-cute-yellow: #FFF5BA;
+  --color-cute-coral: #FFB4A2;
+  --color-cute-border: #2D2D2D;
 }
 
 :root {
@@ -146,8 +167,8 @@
   }
   body {
     @apply bg-background text-foreground;
-    /* Instagram 기본 폰트 패밀리 적용 */
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    /* 귀여운 손그림 폰트 적용 */
+    font-family: 'SchoolSafeBoardMarker', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   }
   /* main 요소 전역 스타일 제거: app/(main)/layout.tsx에서 Instagram 레이아웃을 위해 명시적으로 관리 */
   /* 기존 스타일 (max-w-7xl mx-auto pt-16 px-4)은 Instagram 레이아웃과 충돌하므로 제거됨 */
@@ -174,4 +195,520 @@
 
 .animate-like-heart-appear {
   animation: like-heart-appear 1s ease-in-out forwards;
+}
+
+/* ========================================
+   손그림(크로마키) 스타일 테두리
+   ======================================== */
+
+/* 기본 손그림 테두리 */
+.sketch-border {
+  border: 3px solid var(--color-cute-border);
+  border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px;
+  box-shadow: 
+    2px 2px 0px rgba(0, 0, 0, 0.1),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.5);
+  position: relative;
+}
+
+/* 카드 전용 손그림 스타일 */
+.sketch-card {
+  border: 3px solid var(--color-cute-border);
+  border-radius: 30px 5px 20px 5px / 5px 20px 5px 30px;
+  box-shadow: 
+    4px 4px 0px rgba(0, 0, 0, 0.15),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.3);
+  background: linear-gradient(135deg, #ffffff 0%, #fefefe 100%);
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.sketch-card:hover {
+  transform: translateY(-4px) rotate(-0.5deg);
+  box-shadow: 
+    6px 8px 0px rgba(0, 0, 0, 0.2),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.5);
+}
+
+/* 버튼 전용 손그림 스타일 */
+.sketch-button {
+  border: 2px solid var(--color-cute-border);
+  border-radius: 20px 5px 15px 5px / 5px 15px 5px 20px;
+  box-shadow: 3px 3px 0px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  position: relative;
+}
+
+.sketch-button:hover {
+  transform: translateY(-2px) rotate(-1deg);
+  box-shadow: 4px 5px 0px rgba(0, 0, 0, 0.25);
+}
+
+.sketch-button:active {
+  transform: translateY(1px);
+  box-shadow: 1px 1px 0px rgba(0, 0, 0, 0.2);
+}
+
+/* 입력 필드 손그림 스타일 */
+.sketch-input {
+  border: 2px solid var(--color-cute-border);
+  border-radius: 15px 5px 10px 5px / 5px 10px 5px 15px;
+  box-shadow: 
+    2px 2px 0px rgba(0, 0, 0, 0.1),
+    inset 2px 2px 4px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+}
+
+.sketch-input:focus {
+  border-color: var(--color-cute-pink);
+  box-shadow: 
+    3px 3px 0px var(--color-cute-pink),
+    inset 2px 2px 4px rgba(0, 0, 0, 0.05);
+  outline: none;
+}
+
+/* 프로필 이미지 손그림 테두리 */
+.sketch-avatar {
+  border: 3px solid var(--color-cute-border);
+  border-radius: 50% 45% 55% 50% / 50% 55% 45% 50%;
+  box-shadow: 3px 3px 0px rgba(0, 0, 0, 0.15);
+}
+
+/* 모달 손그림 스타일 */
+.sketch-modal {
+  border: 4px solid var(--color-cute-border);
+  border-radius: 40px 10px 30px 10px / 10px 30px 10px 40px;
+  box-shadow: 8px 8px 0px rgba(0, 0, 0, 0.2);
+}
+
+/* ========================================
+   Shimmer 로딩 애니메이션
+   ======================================== */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.animate-shimmer {
+  background: linear-gradient(
+    90deg,
+    #f0f0f0 25%,
+    #e0e0e0 37%,
+    #f0f0f0 63%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+/* 귀여운 shimmer (파스텔) */
+.animate-shimmer-cute {
+  background: linear-gradient(
+    90deg,
+    var(--color-cute-peach) 25%,
+    var(--color-cute-pink) 37%,
+    var(--color-cute-peach) 63%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+/* ========================================
+   페이지 전환 애니메이션
+   ======================================== */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slide-down {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes bounce-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  70% {
+    transform: scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes wiggle {
+  0%, 100% {
+    transform: rotate(-3deg);
+  }
+  50% {
+    transform: rotate(3deg);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.5s ease-out forwards;
+}
+
+.animate-slide-up {
+  animation: slide-up 0.5s ease-out forwards;
+}
+
+.animate-slide-down {
+  animation: slide-down 0.5s ease-out forwards;
+}
+
+.animate-bounce-in {
+  animation: bounce-in 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.animate-wiggle {
+  animation: wiggle 0.5s ease-in-out;
+}
+
+/* Stagger 애니메이션을 위한 딜레이 */
+.stagger-1 { animation-delay: 0.05s; }
+.stagger-2 { animation-delay: 0.1s; }
+.stagger-3 { animation-delay: 0.15s; }
+.stagger-4 { animation-delay: 0.2s; }
+.stagger-5 { animation-delay: 0.25s; }
+.stagger-6 { animation-delay: 0.3s; }
+.stagger-7 { animation-delay: 0.35s; }
+.stagger-8 { animation-delay: 0.4s; }
+.stagger-9 { animation-delay: 0.45s; }
+.stagger-10 { animation-delay: 0.5s; }
+.stagger-11 { animation-delay: 0.55s; }
+.stagger-12 { animation-delay: 0.6s; }
+
+/* ========================================
+   마이크로 인터랙션
+   ======================================== */
+
+/* 버튼 hover 효과 */
+.hover-bounce:hover {
+  animation: bounce-in 0.3s ease-out;
+}
+
+.hover-wiggle:hover {
+  animation: wiggle 0.3s ease-in-out;
+}
+
+.hover-scale {
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.hover-scale:hover {
+  transform: scale(1.1);
+}
+
+.hover-scale:active {
+  transform: scale(0.95);
+}
+
+/* 탭 언더라인 애니메이션 */
+.tab-underline {
+  position: relative;
+}
+
+.tab-underline::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 0;
+  height: 3px;
+  background: var(--color-cute-border);
+  border-radius: 3px;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transform: translateX(-50%);
+}
+
+.tab-underline:hover::after,
+.tab-underline.active::after {
+  width: 80%;
+}
+
+/* 아이콘 bounce 효과 */
+@keyframes icon-bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+.icon-bounce:active {
+  animation: icon-bounce 0.3s ease-out;
+}
+
+/* 하트 펄스 효과 */
+@keyframes heart-pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+}
+
+.heart-pulse:hover {
+  animation: heart-pulse 0.6s ease-in-out infinite;
+}
+
+/* ========================================
+   반응형 전환 애니메이션
+   ======================================== */
+
+/* 사이드바 전환 */
+.sidebar-transition {
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 헤더/네비게이션 슬라이드 */
+@keyframes slide-in-top {
+  from {
+    transform: translateY(-100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes slide-in-bottom {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-in-top {
+  animation: slide-in-top 0.3s ease-out forwards;
+}
+
+.animate-slide-in-bottom {
+  animation: slide-in-bottom 0.3s ease-out forwards;
+}
+
+/* ========================================
+   귀여운 UI 추가 효과
+   ======================================== */
+
+/* 반짝이 효과 */
+@keyframes sparkle {
+  0%, 100% {
+    opacity: 0;
+    transform: scale(0);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.sparkle::before {
+  content: '✨';
+  position: absolute;
+  animation: sparkle 2s ease-in-out infinite;
+}
+
+/* 숫자 카운트 bounce */
+@keyframes count-bounce {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.3);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.count-bounce {
+  animation: count-bounce 0.3s ease-out;
+}
+
+/* 귀여운 그라데이션 배경 */
+.cute-gradient-bg {
+  background: linear-gradient(
+    135deg,
+    var(--color-cute-peach) 0%,
+    var(--color-cute-pink) 25%,
+    var(--color-cute-lavender) 50%,
+    var(--color-cute-sky) 75%,
+    var(--color-cute-mint) 100%
+  );
+}
+
+/* 점선 테두리 */
+.dashed-border {
+  border: 3px dashed var(--color-cute-border);
+  border-radius: 20px;
+}
+
+/* 물결 효과 */
+@keyframes wave {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(5deg);
+  }
+  75% {
+    transform: rotate(-5deg);
+  }
+}
+
+.wave-on-hover:hover {
+  animation: wave 0.5s ease-in-out;
+}
+
+/* ========================================
+   네비게이션 메뉴 동적 하이라이트
+   ======================================== */
+
+/* 네비게이션 아이템 기본 스타일 */
+.nav-item {
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  background: transparent;
+}
+
+/* 네비게이션 아이템 호버 효과 - 직접 배경색 변경 */
+.nav-item:hover {
+  background: linear-gradient(135deg, var(--color-cute-pink) 0%, var(--color-cute-peach) 100%);
+  transform: translateX(4px) scale(1.02);
+}
+
+.nav-item:active {
+  transform: translateX(2px) scale(0.98);
+  background: linear-gradient(135deg, var(--color-cute-peach) 0%, var(--color-cute-pink) 100%);
+}
+
+/* 활성 상태 네비게이션 아이템 */
+.nav-item-active {
+  background: linear-gradient(135deg, var(--color-cute-mint) 0%, var(--color-cute-sky) 100%);
+}
+
+.nav-item-active:hover {
+  background: linear-gradient(135deg, var(--color-cute-sky) 0%, var(--color-cute-mint) 100%);
+}
+
+/* 네비게이션 아이콘 호버 효과 */
+.nav-item:hover .nav-icon {
+  transform: scale(1.15) rotate(-5deg);
+}
+
+.nav-item:active .nav-icon {
+  transform: scale(0.95);
+}
+
+.nav-icon {
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* 네비게이션 텍스트 호버 효과 */
+.nav-item:hover .nav-text {
+  transform: translateX(4px);
+}
+
+.nav-text {
+  transition: transform 0.3s ease;
+}
+
+/* 버튼형 네비게이션 아이템 (만들기 버튼) */
+.nav-item-button {
+  background: linear-gradient(135deg, var(--color-cute-peach) 0%, var(--color-cute-coral) 100%);
+}
+
+.nav-item-button:hover {
+  background: linear-gradient(135deg, var(--color-cute-coral) 0%, var(--color-cute-peach) 100%);
+}
+
+/* ========================================
+   프로필 탭 스타일
+   ======================================== */
+
+.profile-tab {
+  position: relative;
+  color: var(--color-instagram-text-secondary);
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.profile-tab::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, var(--color-cute-peach) 0%, var(--color-cute-pink) 100%);
+  opacity: 0;
+  border-radius: inherit;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  transform: scale(0.9);
+  z-index: -1;
+}
+
+.profile-tab:hover::before {
+  opacity: 0.5;
+  transform: scale(1);
+}
+
+.profile-tab:hover {
+  color: var(--color-instagram-text-primary);
+  transform: translateY(-2px);
+}
+
+/* 활성 탭 스타일 */
+.profile-tab-active {
+  color: var(--color-cute-border);
+  font-weight: 700;
+}
+
+.profile-tab-active::before {
+  opacity: 0.7;
+  transform: scale(1);
+  background: linear-gradient(135deg, var(--color-cute-mint) 0%, var(--color-cute-sky) 100%);
+}
+
+.profile-tab-active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60%;
+  height: 3px;
+  background: var(--color-cute-border);
+  border-radius: 3px;
 }

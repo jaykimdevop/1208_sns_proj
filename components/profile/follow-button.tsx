@@ -103,7 +103,7 @@ export function FollowButton({
 
   // 추가 클래스 결정
   const getButtonClassName = () => {
-    const baseClasses = "font-semibold min-w-[100px] transition-all";
+    const baseClasses = "font-semibold min-w-[100px] transition-all sketch-button";
     
     if (isFollowing && isHovered) {
       return `${baseClasses} border-red-500 text-red-500 hover:bg-red-50`;
@@ -121,6 +121,10 @@ export function FollowButton({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       disabled={isLoading}
+      style={{
+        backgroundColor: !isFollowing ? "var(--color-cute-pink)" : undefined,
+        borderColor: isFollowing && !isHovered ? "var(--color-cute-border)" : undefined,
+      }}
     >
       {getButtonText()}
     </Button>

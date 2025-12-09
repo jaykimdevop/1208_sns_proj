@@ -165,32 +165,32 @@ export const CommentForm = forwardRef<CommentFormRef, CommentFormProps>(
         {/* 답글 모드 표시 */}
         {activeReplyTo && (
           <div
-            className="flex items-center justify-between px-4 py-2 bg-gray-50"
-            style={{ borderBottom: "1px solid var(--color-instagram-border)" }}
+            className="flex items-center justify-between px-4 py-2 animate-slide-down"
+            style={{ backgroundColor: "var(--color-cute-peach)", borderBottom: "2px dashed var(--color-cute-border)" }}
           >
             <span
               className="text-xs"
-              style={{ color: "var(--color-instagram-text-secondary)" }}
+              style={{ color: "var(--color-cute-border)" }}
             >
-              <span className="font-semibold" style={{ color: "var(--color-instagram-text-primary)" }}>
+              💬 <span className="font-semibold">
                 {activeReplyTo.user?.name || "Unknown"}
               </span>
               님에게 답글 남기는 중
             </span>
             <button
               onClick={handleCancelReply}
-              className="p-1 hover:opacity-70 transition-opacity"
+              className="p-1 hover-scale transition-all"
               aria-label="답글 취소"
             >
-              <X size={14} style={{ color: "var(--color-instagram-text-secondary)" }} />
+              <X size={14} style={{ color: "var(--color-cute-border)" }} />
             </button>
           </div>
         )}
 
         {/* 입력 폼 */}
         <div
-          className="flex items-center gap-2 px-4 py-3 border-t"
-          style={{ borderColor: "var(--color-instagram-border)" }}
+          className="flex items-center gap-2 px-4 py-3 border-t-2 border-dashed"
+          style={{ borderColor: "var(--color-cute-border)" }}
         >
           <input
             ref={inputRef}
@@ -207,32 +207,31 @@ export const CommentForm = forwardRef<CommentFormRef, CommentFormProps>(
             placeholder={
               isSignedIn
                 ? activeReplyTo
-                  ? "답글 달기..."
-                  : "댓글 달기..."
-                : "로그인하고 댓글을 남겨보세요"
+                  ? "답글 달기... 💬"
+                  : "댓글 달기... ✏️"
+                : "로그인하고 댓글을 남겨보세요 🔐"
             }
             disabled={isSubmitting}
             readOnly={!isSignedIn}
-            className="flex-1 text-sm bg-transparent border-none outline-none placeholder:text-gray-400 disabled:opacity-50 cursor-pointer"
-            style={{ color: "var(--color-instagram-text-primary)" }}
+            className="flex-1 text-sm bg-transparent border-none outline-none placeholder:text-gray-400 disabled:opacity-50 cursor-pointer sketch-input px-3 py-2"
+            style={{ color: "var(--color-cute-border)" }}
           />
           <button
             type="button"
             onClick={handleSubmit}
             disabled={(!hasContent || isSubmitting) && isSignedIn}
-            className="text-sm font-semibold transition-opacity disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
+            className="text-sm font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 sketch-button px-3 py-1"
             style={{
-              color: hasContent || !isSignedIn
-                ? "var(--color-instagram-primary)"
-                : "var(--color-instagram-text-secondary)",
+              backgroundColor: hasContent || !isSignedIn ? "var(--color-cute-pink)" : "transparent",
+              color: "var(--color-cute-border)",
             }}
           >
             {isSubmitting ? (
               <Loader2 size={14} className="animate-spin" />
             ) : isSignedIn ? (
-              "게시"
+              "게시 ✨"
             ) : (
-              "로그인"
+              "로그인 🔑"
             )}
           </button>
           {error && (

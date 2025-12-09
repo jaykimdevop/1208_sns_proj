@@ -29,10 +29,10 @@ export function Header() {
   };
 
   return (
-    <header className="md:hidden fixed top-0 left-0 right-0 h-[60px] bg-white border-b z-50 flex items-center justify-between px-4" style={{ borderColor: 'var(--color-instagram-border)' }}>
+    <header className="md:hidden fixed top-0 left-0 right-0 h-[60px] bg-white border-b-4 border-dashed z-50 flex items-center justify-between px-4 animate-slide-in-top" style={{ borderColor: 'var(--color-cute-border)', background: 'linear-gradient(180deg, #FFF5F5 0%, #FFFFFF 100%)' }}>
       {/* 로고 */}
-      <Link href="/" className="text-xl font-bold" style={{ color: 'var(--color-instagram-text-primary)' }}>
-        Instagram
+      <Link href="/" className="text-xl font-bold wave-on-hover" style={{ color: 'var(--color-cute-border)' }}>
+        ✏️ Instasketch
       </Link>
 
       {/* 아이콘들 */}
@@ -40,8 +40,8 @@ export function Header() {
         {isSignedIn ? (
           <Link
             href={getProfileHref()}
-            className="hover:opacity-70 transition-opacity"
-            style={{ color: 'var(--color-instagram-text-primary)' }}
+            className="hover-scale transition-all"
+            style={{ color: 'var(--color-cute-border)' }}
             aria-label="프로필"
           >
             <User size={24} />
@@ -49,11 +49,12 @@ export function Header() {
         ) : (
           <Link
             href="/sign-in"
-            className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-blue-500 text-white text-sm font-semibold hover:bg-blue-600 transition-colors"
+            className="flex items-center gap-1 px-3 py-1.5 sketch-button text-sm font-semibold transition-all"
+            style={{ backgroundColor: 'var(--color-cute-pink)', color: 'var(--color-cute-border)' }}
             aria-label="로그인"
           >
             <LogIn size={16} />
-            로그인
+            로그인 🔑
           </Link>
         )}
       </div>

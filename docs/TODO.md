@@ -286,18 +286,112 @@
 
 ## Phase 11. 반응형 및 애니메이션
 
-- [ ] 반응형 브레이크포인트 적용
-  - [ ] Mobile (< 768px): BottomNav, Header 표시
-  - [ ] Tablet (768px ~ 1023px): Icon-only Sidebar
-  - [ ] Desktop (1024px+): Full Sidebar
-- [ ] 좋아요 애니메이션
-  - [ ] 클릭 시 scale(1.3) → scale(1) (0.15초)
-  - [ ] 더블탭 시 큰 하트 fade in/out (1초)
-- [ ] 로딩 상태
-  - [ ] Skeleton UI (PostCardSkeleton)
-  - [ ] Shimmer 효과
+- [x] 커스텀 폰트 및 귀여운 테마 적용
+  - [x] SchoolSafeBoardMarker 웹폰트 추가
+  - [x] 귀여운 파스텔 컬러 팔레트 추가
+  - [x] 손그림(크로마키) 스타일 테두리 CSS 클래스 정의
+    - [x] `.sketch-border`: 불규칙한 손그림 테두리 효과
+    - [x] `.sketch-card`: 카드 전용 손그림 스타일
+    - [x] `.sketch-button`: 버튼 전용 손그림 스타일
+    - [x] `.sketch-input`: 입력 필드 손그림 스타일
+    - [x] `.sketch-avatar`: 프로필 이미지 손그림 테두리
+    - [x] `.sketch-modal`: 모달 손그림 스타일
+  - [x] SVG 필터 정의 추가 (손그림 테두리용 turbulence 효과)
+- [x] 반응형 브레이크포인트 적용
+  - [x] Mobile (< 768px): BottomNav, Header 표시
+  - [x] Tablet (768px ~ 1023px): Icon-only Sidebar
+  - [x] Desktop (1024px+): Full Sidebar
+- [x] 좋아요 애니메이션
+  - [x] 클릭 시 scale(1.3) → scale(1) (0.15초)
+  - [x] 더블탭 시 큰 하트 fade in/out (1초)
+  - [x] hover 시 heart-pulse 효과 추가
+- [x] 로딩 상태
+  - [x] Skeleton UI (PostCardSkeleton) 개선
+  - [x] Shimmer gradient 애니메이션 추가
+  - [x] ProfileSkeleton 컴포넌트 생성
+  - [x] PostModalSkeleton 컴포넌트 생성
+- [x] 페이지 전환 애니메이션
+  - [x] fade-in, slide-up, slide-down, bounce-in 애니메이션 정의
+  - [x] 메인 페이지 진입 시 fade-in 적용
+  - [x] 프로필 페이지 진입 시 애니메이션 적용
+  - [x] 그리드 아이템 stagger 애니메이션
+- [x] 마이크로 인터랙션
+  - [x] 버튼 hover 애니메이션 (hover-scale, hover-wiggle)
+  - [x] 탭 전환 애니메이션 (tab-underline)
+  - [x] 아이콘 bounce 효과 (icon-bounce)
+  - [x] 네비게이션 아이템 hover 효과 개선
+- [x] 반응형 전환 애니메이션
+  - [x] Sidebar 전환 애니메이션 (sidebar-transition)
+  - [x] Header 슬라이드 애니메이션 (animate-slide-in-top)
+  - [x] BottomNav 슬라이드 애니메이션 (animate-slide-in-bottom)
+- [x] 귀여운 UI 요소 적용
+  - [x] PostCard 손그림 스타일 적용
+  - [x] ProfileHeader 귀여운 테두리 및 색상 적용
+  - [x] CommentForm 손그림 입력 필드 적용
+  - [x] 앱 이름 변경 (Instagram → Instasketch)
+- [x] 네비게이션 동적 하이라이트
+  - [x] Sidebar/BottomNav 메뉴 호버 시 동적 배경 하이라이트
+  - [x] 일반 메뉴 (홈, 검색, 프로필 등): 핑크-피치 그라데이션
+  - [x] 만들기 버튼: 민트-스카이 그라데이션
+  - [x] 아이콘 확대(1.15배) + 회전(-5도) 애니메이션
+  - [x] 텍스트 오른쪽 이동 애니메이션
+  - [x] 기본 상태는 배경 없음 (호버 시에만 표시)
+- [x] 프로필 페이지 UI 개선
+  - [x] 통계 레이아웃: 숫자 크게 강조 + 줄바꿈 + 레이블 작게
+  - [x] 점선 테두리 전체 너비로 확장 (Desktop 연속성 수정)
+  - [x] 탭 뷰 크기 증가 (아이콘 20px, 텍스트 text-sm)
+  - [x] 탭-컨텐츠 간격 추가 (pt-6)
+  - [x] 프로필 탭 스타일 클래스 추가 (.profile-tab, .profile-tab-active)
+- [x] "만들기" 버튼 UX 개선
+  - [x] Sidebar/BottomNav "만들기" 버튼에 cursor-pointer 추가
+- [x] CreatePostModal 손그림 스타일 적용
+  - [x] sketch-modal 클래스 적용 (파스텔 그라데이션 배경, bounce-in 애니메이션)
+  - [x] 헤더: 점선 테두리, ✏️ 이모지 추가, 볼드 타이틀
+  - [x] 드래그앤드롭 영역: 점선 테두리, 드래그 시 민트색 하이라이트, 📸/💾 이모지
+  - [x] 이미지 미리보기: 손그림 테두리 및 그림자 효과
+  - [x] 캡션 입력: sketch-input 스타일, ✍️ 이모지 플레이스홀더
+  - [x] 에러 메시지: 코랄색 배경/테두리, ⚠️ 이모지
+  - [x] 공유 버튼: sketch-button 스타일, 민트-스카이 그라데이션, 🚀 이모지
 
-## Phase 12. 에러 핸들링 및 최적화
+## Phase 12. 검색 기능
+
+- [x] 검색 API 엔드포인트
+  - [x] `app/api/search/route.ts` 생성
+  - [x] GET: 통합 검색 (사용자 + 게시물)
+  - [x] 쿼리 파라미터: `q` (검색어), `type` (users/posts/all), `limit`, `offset`
+  - [x] 사용자 검색: `user_stats` 뷰에서 `name` ILIKE 검색
+  - [x] 게시물 검색: `post_stats` 뷰에서 `caption` ILIKE 검색
+  - [x] 결과에 통계 정보 포함 (게시물 수, 팔로워 수, 좋아요 수 등)
+- [x] 검색 관련 타입 정의
+  - [x] `SearchUserResult`: 검색된 사용자 결과 타입
+  - [x] `SearchPostResult`: 검색된 게시물 결과 타입
+  - [x] `SearchResponse`: 통합 검색 API 응답 타입
+- [x] SearchModal 컴포넌트
+  - [x] `components/search/search-modal.tsx` 생성
+  - [x] 손그림 스타일 모달 (sketch-modal)
+  - [x] 검색 입력 필드 (sketch-input, 디바운스 300ms)
+  - [x] 탭 전환 (사용자/게시물, profile-tab 스타일)
+  - [x] 검색 결과 목록 (무한 스크롤)
+  - [x] 로딩 상태 표시
+  - [x] 검색 결과 없음 상태 표시
+  - [x] ESC 키로 모달 닫기
+- [x] UserSearchResult 컴포넌트
+  - [x] `components/search/user-search-result.tsx` 생성
+  - [x] 이니셜 아바타 (파스텔 색상)
+  - [x] 사용자명, 게시물 수, 팔로워 수 표시
+  - [x] 클릭 시 프로필 페이지 이동 및 모달 닫기
+  - [x] 호버 시 핑크-피치 그라데이션 배경
+- [x] PostSearchResult 컴포넌트
+  - [x] `components/search/post-search-result.tsx` 생성
+  - [x] 썸네일 이미지 (64x64, 손그림 테두리)
+  - [x] 캡션 미리보기 (검색어 하이라이트)
+  - [x] 작성자 정보, 좋아요/댓글 수 표시
+  - [x] 클릭 시 게시물 상세 모달 (Desktop) / 상세 페이지 (Mobile)
+- [x] 네비게이션 연결
+  - [x] Sidebar "검색" 버튼 클릭 시 SearchModal 열기
+  - [x] BottomNav "검색" 버튼 클릭 시 SearchModal 열기
+
+## Phase 13. 에러 핸들링 및 최적화
 
 - [ ] 에러 핸들링
   - [ ] API 에러 처리
@@ -310,7 +404,7 @@
   - [ ] React.memo 적용 (필요한 컴포넌트)
   - [ ] useMemo, useCallback 활용
 
-## Phase 13. 최종 마무리
+## Phase 14. 최종 마무리
 
 - [ ] 모바일/태블릿 반응형 테스트
   - [ ] 다양한 화면 크기에서 테스트

@@ -98,12 +98,12 @@ export function LikeButton({
     <button
       onClick={handleClick}
       disabled={isLoading}
-      className={`hover:opacity-70 transition-opacity ${isAnimating ? "animate-like-bounce" : ""}`}
+      className={`hover-scale heart-pulse transition-all ${isAnimating ? "animate-like-bounce" : ""}`}
       aria-label={liked ? "좋아요 취소" : "좋아요"}
     >
       <Heart
         size={24}
-        className={liked ? "fill-current" : ""}
+        className={`${liked ? "fill-current" : ""} transition-transform`}
         style={{
           color: liked
             ? "var(--color-instagram-like)"

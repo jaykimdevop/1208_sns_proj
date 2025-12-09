@@ -298,27 +298,27 @@ export function PostCard({ post, onPostDeleted }: PostCardProps) {
       </AlertDialogContent>
     </AlertDialog>
 
-    <article className="bg-white rounded-lg border mb-6" style={{ borderColor: 'var(--color-instagram-border)' }}>
+    <article className="sketch-card bg-white mb-6 overflow-hidden animate-slide-up" style={{ background: 'linear-gradient(135deg, #FFFFFF 0%, #FFF9F9 100%)' }}>
       {/* 헤더 영역 (60px) */}
-      <header className="flex items-center justify-between px-4 h-[60px] border-b" style={{ borderColor: 'var(--color-instagram-border)' }}>
+      <header className="flex items-center justify-between px-4 h-[60px] border-b-2 border-dashed" style={{ borderColor: 'var(--color-cute-border)' }}>
         <div className="flex items-center gap-3">
           {/* 프로필 이미지 */}
-          <Link href={`/profile/${post.user_id}`}>
-            <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
+          <Link href={`/profile/${post.user_id}`} className="hover-scale">
+            <div className="w-8 h-8 sketch-avatar flex items-center justify-center overflow-hidden" style={{ backgroundColor: 'var(--color-cute-peach)' }}>
               {post.user?.name ? (
-                <span className="text-xs font-semibold" style={{ color: 'var(--color-instagram-text-primary)' }}>
+                <span className="text-xs font-semibold" style={{ color: 'var(--color-cute-border)' }}>
                   {post.user.name.charAt(0).toUpperCase()}
                 </span>
               ) : (
-                <div className="w-full h-full bg-gray-300" />
+                <div className="w-full h-full" style={{ backgroundColor: 'var(--color-cute-lavender)' }} />
               )}
             </div>
           </Link>
           {/* 사용자명 */}
           <Link
             href={`/profile/${post.user_id}`}
-            className="font-semibold text-sm"
-            style={{ color: 'var(--color-instagram-text-primary)' }}
+            className="font-semibold text-sm hover:underline"
+            style={{ color: 'var(--color-cute-border)' }}
           >
             {post.user?.name || "Unknown"}
           </Link>
@@ -334,7 +334,7 @@ export function PostCard({ post, onPostDeleted }: PostCardProps) {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button
-              className="p-1 hover:opacity-70 transition-opacity"
+              className="p-1 hover-scale transition-all"
               aria-label="더보기"
             >
               <MoreHorizontal

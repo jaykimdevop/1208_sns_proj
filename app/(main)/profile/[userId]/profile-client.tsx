@@ -133,37 +133,34 @@ export function ProfileClient({
 
   return (
     <div
-      className="min-h-screen"
+      className="min-h-screen animate-fade-in"
       style={{ backgroundColor: "var(--color-instagram-bg)" }}
     >
       {/* 프로필 헤더 */}
-      <ProfileHeader
-        user={user}
-        isOwnProfile={isOwnProfile}
-        isFollowing={isFollowing}
-        onFollowChange={handleFollowChange}
-      />
+      <div className="animate-slide-down">
+        <ProfileHeader
+          user={user}
+          isOwnProfile={isOwnProfile}
+          isFollowing={isFollowing}
+          onFollowChange={handleFollowChange}
+        />
+      </div>
 
       {/* 탭 */}
       <div
-        className="border-t max-w-4xl mx-auto"
-        style={{ borderColor: "var(--color-instagram-border)" }}
+        className="border-t-2 border-dashed w-full animate-slide-up"
+        style={{ borderColor: "var(--color-cute-border)" }}
       >
-        <div className="flex justify-center gap-8">
+        <div className="flex justify-center gap-12 max-w-4xl mx-auto py-2">
           {/* 게시물 탭 */}
           <button
             onClick={() => setActiveTab("posts")}
-            className={`flex items-center gap-2 px-4 py-3 border-t-2 transition-colors ${
-              activeTab === "posts" ? "border-current" : "border-transparent"
+            className={`profile-tab flex items-center gap-3 px-6 py-4 transition-all rounded-xl ${
+              activeTab === "posts" ? "profile-tab-active" : ""
             }`}
-            style={{
-              color: activeTab === "posts"
-                ? "var(--color-instagram-text-primary)"
-                : "var(--color-instagram-text-secondary)",
-            }}
           >
-            <Grid3X3 size={12} />
-            <span className="text-xs font-semibold tracking-wider uppercase">
+            <Grid3X3 size={20} className={activeTab === "posts" ? "wave-on-hover" : ""} />
+            <span className="text-sm font-semibold tracking-wider uppercase">
               게시물
             </span>
           </button>
@@ -172,17 +169,12 @@ export function ProfileClient({
           {isOwnProfile && (
             <button
               onClick={() => setActiveTab("saved")}
-              className={`flex items-center gap-2 px-4 py-3 border-t-2 transition-colors ${
-                activeTab === "saved" ? "border-current" : "border-transparent"
+              className={`profile-tab flex items-center gap-3 px-6 py-4 transition-all rounded-xl ${
+                activeTab === "saved" ? "profile-tab-active" : ""
               }`}
-              style={{
-                color: activeTab === "saved"
-                  ? "var(--color-instagram-text-primary)"
-                  : "var(--color-instagram-text-secondary)",
-              }}
             >
-              <Bookmark size={12} />
-              <span className="text-xs font-semibold tracking-wider uppercase">
+              <Bookmark size={20} />
+              <span className="text-sm font-semibold tracking-wider uppercase">
                 저장됨
               </span>
             </button>
@@ -191,7 +183,7 @@ export function ProfileClient({
       </div>
 
       {/* 게시물 그리드 */}
-      <div className="max-w-4xl mx-auto pb-16">
+      <div className="max-w-4xl mx-auto pb-16 pt-6">
         {activeTab === "posts" ? (
           <PostGrid
             posts={posts}

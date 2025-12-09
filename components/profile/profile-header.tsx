@@ -69,14 +69,14 @@ export function ProfileHeader({
     <header className="px-4 py-6 md:px-8 md:py-10">
       <div className="flex items-start gap-6 md:gap-16 max-w-4xl mx-auto">
         {/* 프로필 이미지 */}
-        <div className="flex-shrink-0">
+        <div className="flex-shrink-0 hover-scale">
           <div
-            className="w-[90px] h-[90px] md:w-[150px] md:h-[150px] rounded-full flex items-center justify-center"
-            style={{ backgroundColor: "var(--color-instagram-border)" }}
+            className="w-[90px] h-[90px] md:w-[150px] md:h-[150px] sketch-avatar flex items-center justify-center wave-on-hover"
+            style={{ backgroundColor: "var(--color-cute-lavender)" }}
           >
             <span
               className="text-3xl md:text-5xl font-semibold"
-              style={{ color: "var(--color-instagram-text-primary)" }}
+              style={{ color: "var(--color-cute-border)" }}
             >
               {user.name?.charAt(0).toUpperCase() || "?"}
             </span>
@@ -89,9 +89,9 @@ export function ProfileHeader({
           <div className="flex flex-col md:flex-row md:items-center gap-3 md:gap-6 mb-4 md:mb-6">
             <h1
               className="text-xl md:text-2xl font-normal truncate"
-              style={{ color: "var(--color-instagram-text-primary)" }}
+              style={{ color: "var(--color-cute-border)" }}
             >
-              {user.name}
+              ✨ {user.name}
             </h1>
 
             {/* 버튼 영역 */}
@@ -102,17 +102,19 @@ export function ProfileHeader({
                   <Button
                     variant="outline"
                     size="sm"
-                    className="font-semibold"
+                    className="font-semibold sketch-button"
                     disabled
+                    style={{ borderColor: "var(--color-cute-border)" }}
                   >
                     프로필 편집
                   </Button>
                   <Button
                     variant="outline"
                     size="sm"
-                    className="font-semibold"
+                    className="font-semibold sketch-button"
                     onClick={handleSignOut}
                     disabled={isLoggingOut}
+                    style={{ backgroundColor: "var(--color-cute-coral)", borderColor: "var(--color-cute-border)" }}
                   >
                     <LogOut size={16} className="mr-1" />
                     {isLoggingOut ? "로그아웃 중..." : "로그아웃"}
@@ -130,37 +132,46 @@ export function ProfileHeader({
           </div>
 
           {/* 통계 (Desktop) */}
-          <div className="hidden md:flex gap-10 mb-4">
-            <div className="flex gap-1">
+          <div className="hidden md:flex gap-12 mb-4">
+            <div className="flex flex-col items-center hover-scale transition-all cursor-default">
               <span
-                className="font-semibold"
-                style={{ color: "var(--color-instagram-text-primary)" }}
+                className="text-2xl font-bold"
+                style={{ color: "var(--color-cute-border)" }}
               >
                 {formatCount(user.posts_count)}
               </span>
-              <span style={{ color: "var(--color-instagram-text-primary)" }}>
+              <span 
+                className="text-sm whitespace-nowrap"
+                style={{ color: "var(--color-instagram-text-secondary)" }}
+              >
                 게시물
               </span>
             </div>
-            <button className="flex gap-1 hover:opacity-70 transition-opacity">
+            <button className="flex flex-col items-center hover-scale transition-all">
               <span
-                className="font-semibold"
-                style={{ color: "var(--color-instagram-text-primary)" }}
+                className="text-2xl font-bold"
+                style={{ color: "var(--color-cute-border)" }}
               >
                 {formatCount(user.followers_count)}
               </span>
-              <span style={{ color: "var(--color-instagram-text-primary)" }}>
+              <span 
+                className="text-sm whitespace-nowrap"
+                style={{ color: "var(--color-instagram-text-secondary)" }}
+              >
                 팔로워
               </span>
             </button>
-            <button className="flex gap-1 hover:opacity-70 transition-opacity">
+            <button className="flex flex-col items-center hover-scale transition-all">
               <span
-                className="font-semibold"
-                style={{ color: "var(--color-instagram-text-primary)" }}
+                className="text-2xl font-bold"
+                style={{ color: "var(--color-cute-border)" }}
               >
                 {formatCount(user.following_count)}
               </span>
-              <span style={{ color: "var(--color-instagram-text-primary)" }}>
+              <span 
+                className="text-sm whitespace-nowrap"
+                style={{ color: "var(--color-instagram-text-secondary)" }}
+              >
                 팔로잉
               </span>
             </button>
@@ -170,46 +181,46 @@ export function ProfileHeader({
 
       {/* 통계 (Mobile) */}
       <div
-        className="flex md:hidden justify-around py-4 mt-4 border-t"
-        style={{ borderColor: "var(--color-instagram-border)" }}
+        className="flex md:hidden justify-around py-4 mt-4 border-t-2 border-dashed"
+        style={{ borderColor: "var(--color-cute-border)" }}
       >
-        <div className="flex flex-col items-center">
+        <div className="flex flex-col items-center hover-scale transition-all">
           <span
-            className="font-semibold"
-            style={{ color: "var(--color-instagram-text-primary)" }}
+            className="text-xl font-bold"
+            style={{ color: "var(--color-cute-border)" }}
           >
             {formatCount(user.posts_count)}
           </span>
           <span
-            className="text-sm"
+            className="text-xs whitespace-nowrap"
             style={{ color: "var(--color-instagram-text-secondary)" }}
           >
             게시물
           </span>
         </div>
-        <button className="flex flex-col items-center hover:opacity-70 transition-opacity">
+        <button className="flex flex-col items-center hover-scale transition-all">
           <span
-            className="font-semibold"
-            style={{ color: "var(--color-instagram-text-primary)" }}
+            className="text-xl font-bold"
+            style={{ color: "var(--color-cute-border)" }}
           >
             {formatCount(user.followers_count)}
           </span>
           <span
-            className="text-sm"
+            className="text-xs whitespace-nowrap"
             style={{ color: "var(--color-instagram-text-secondary)" }}
           >
             팔로워
           </span>
         </button>
-        <button className="flex flex-col items-center hover:opacity-70 transition-opacity">
+        <button className="flex flex-col items-center hover-scale transition-all">
           <span
-            className="font-semibold"
-            style={{ color: "var(--color-instagram-text-primary)" }}
+            className="text-xl font-bold"
+            style={{ color: "var(--color-cute-border)" }}
           >
             {formatCount(user.following_count)}
           </span>
           <span
-            className="text-sm"
+            className="text-xs whitespace-nowrap"
             style={{ color: "var(--color-instagram-text-secondary)" }}
           >
             팔로잉
