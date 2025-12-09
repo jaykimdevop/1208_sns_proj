@@ -11,6 +11,7 @@
  */
 
 import { Suspense } from "react";
+import { auth } from "@clerk/nextjs/server";
 import { PostFeed } from "@/components/post/PostFeed";
 import { PostCardSkeleton } from "@/components/post/PostCardSkeleton";
 import { createClerkSupabaseClient } from "@/lib/supabase/server";
@@ -19,6 +20,19 @@ import type { PostsResponse } from "@/lib/types";
 async function getInitialPosts(): Promise<PostsResponse | null> {
   try {
     const supabase = createClerkSupabaseClient();
+
+    // 현재 로그인한 사용자 정보 가져오기 (좋아요 여부 확인용)
+    const { userId: clerkUserId } = await auth();
+    let currentUserId: string | null = null;
+
+    if (clerkUserId) {
+      const { data: currentUser } = await supabase
+        .from("users")
+        .select("id")
+        .eq("clerk_id", clerkUserId)
+        .single();
+      currentUserId = currentUser?.id || null;
+    }
 
     // post_stats 뷰에서 게시물 조회
     const { data: postsData, error: postsError, count } = await supabase
@@ -89,6 +103,20 @@ async function getInitialPosts(): Promise<PostsResponse | null> {
       }
     });
 
+    // 현재 사용자의 좋아요 여부 조회
+    let likedPostIds = new Set<string>();
+    if (currentUserId) {
+      const { data: userLikes } = await supabase
+        .from("likes")
+        .select("post_id")
+        .eq("user_id", currentUserId)
+        .in("post_id", postIds);
+
+      if (userLikes) {
+        likedPostIds = new Set(userLikes.map((like) => like.post_id));
+      }
+    }
+
     // 데이터 형식 변환
     const formattedPosts = postsData.map((post) => ({
       post_id: post.post_id,
@@ -108,6 +136,7 @@ async function getInitialPosts(): Promise<PostsResponse | null> {
         updated_at: comment.updated_at,
         user: commentUsersMap.get(comment.user_id) || null,
       })),
+      isLiked: likedPostIds.has(post.post_id),
     }));
 
     return {

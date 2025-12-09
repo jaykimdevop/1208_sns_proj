@@ -153,3 +153,25 @@
   /* 기존 스타일 (max-w-7xl mx-auto pt-16 px-4)은 Instagram 레이아웃과 충돌하므로 제거됨 */
   /* 다른 페이지의 main 요소는 각 페이지에서 직접 스타일을 적용해야 함 (예: app/page.tsx) */
 }
+
+/* Instagram 좋아요 애니메이션 */
+@keyframes like-bounce {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.3); }
+}
+
+@keyframes like-heart-appear {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(0); }
+  15% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
+  30% { transform: translate(-50%, -50%) scale(0.95); }
+  45%, 80% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(1); }
+}
+
+.animate-like-bounce {
+  animation: like-bounce 0.15s ease-in-out;
+}
+
+.animate-like-heart-appear {
+  animation: like-heart-appear 1s ease-in-out forwards;
+}

@@ -138,7 +138,7 @@ export interface LikeWithUser extends Like {
  * 게시물 목록 조회 응답 타입
  */
 export interface PostsResponse {
-  data: (PostWithStats & { comments: CommentWithUser[] })[];
+  data: (PostWithStats & { comments: CommentWithUser[]; isLiked: boolean })[];
   count?: number; // 전체 게시물 수 (페이지네이션용)
   hasMore?: boolean; // 더 많은 게시물이 있는지 여부
 }
@@ -202,6 +202,22 @@ export interface CreateCommentRequest {
  */
 export interface FollowRequest {
   following_id: string; // 팔로우할 사용자 ID
+}
+
+/**
+ * 좋아요 API 요청 타입
+ */
+export interface LikeRequest {
+  post_id: string;
+}
+
+/**
+ * 좋아요 API 응답 타입
+ */
+export interface LikeResponse {
+  success: boolean;
+  liked: boolean;
+  error?: string;
 }
 
 // ============================================

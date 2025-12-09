@@ -30,8 +30,8 @@ interface PostFeedProps {
 
 export function PostFeed({ initialPosts, userId }: PostFeedProps) {
   const [posts, setPosts] = useState<
-    (PostWithStats & { comments: CommentWithUser[] })[]
-  >((initialPosts?.data as (PostWithStats & { comments: CommentWithUser[] })[]) || []);
+    (PostWithStats & { comments: CommentWithUser[]; isLiked: boolean })[]
+  >((initialPosts?.data as (PostWithStats & { comments: CommentWithUser[]; isLiked: boolean })[]) || []);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(initialPosts?.hasMore ?? true);
   const [offset, setOffset] = useState(initialPosts?.data?.length || 0);

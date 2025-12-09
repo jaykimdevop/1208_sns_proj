@@ -12,31 +12,34 @@
  * - lib/utils/formatRelativeTime: 상대 시간 표시
  * - lib/types: PostWithStats, CommentWithUser
  * - next/image: 이미지 최적화
+ * - components/post/LikeButton: 좋아요 버튼
+ * - components/post/DoubleTapHeart: 더블탭 좋아요
  */
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
-  Heart,
   MessageCircle,
   Send,
   Bookmark,
   MoreHorizontal,
 } from "lucide-react";
 import { formatRelativeTime } from "@/lib/utils/formatRelativeTime";
-import type { PostWithStats, CommentWithUser } from "@/lib/types";
+import { LikeButton, LikeCount } from "@/components/post/LikeButton";
+import { DoubleTapHeart } from "@/components/post/DoubleTapHeart";
+import type { PostWithStats, CommentWithUser, LikeResponse } from "@/lib/types";
 
 interface PostCardProps {
   post: PostWithStats & {
     comments: CommentWithUser[];
+    isLiked: boolean;
   };
-  isLiked?: boolean; // 추후 좋아요 API 연동 시 사용
 }
 
-export function PostCard({ post, isLiked = false }: PostCardProps) {
+export function PostCard({ post }: PostCardProps) {
   const [showFullCaption, setShowFullCaption] = useState(false);
-  const [liked, setLiked] = useState(isLiked);
+  const [liked, setLiked] = useState(post.isLiked);
   const [likesCount, setLikesCount] = useState(post.likes_count || 0);
 
   // 캡션이 2줄을 초과하는지 확인 (대략적인 계산)
@@ -45,12 +48,45 @@ export function PostCard({ post, isLiked = false }: PostCardProps) {
     : 0;
   const shouldTruncate = captionLines > 2;
 
-  // 좋아요 버튼 클릭 핸들러 (추후 API 연동)
-  const handleLikeClick = () => {
-    setLiked(!liked);
-    setLikesCount(liked ? likesCount - 1 : likesCount + 1);
-    // TODO: API 호출하여 좋아요 상태 업데이트
-  };
+  // 좋아요 상태 변경 핸들러
+  const handleLikeChange = useCallback((newLiked: boolean, newCount: number) => {
+    setLiked(newLiked);
+    setLikesCount(newCount);
+  }, []);
+
+  // 더블탭 좋아요 핸들러
+  const handleDoubleTap = useCallback(async () => {
+    // 이미 좋아요를 눌렀으면 아무것도 하지 않음
+    if (liked) return;
+
+    // Optimistic UI 업데이트
+    setLiked(true);
+    setLikesCount((prev) => prev + 1);
+
+    try {
+      const response = await fetch("/api/likes", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ post_id: post.post_id }),
+      });
+
+      const data: LikeResponse = await response.json();
+
+      if (!data.success) {
+        // API 실패 시 롤백
+        setLiked(false);
+        setLikesCount((prev) => prev - 1);
+        console.error("Like API error:", data.error);
+      }
+    } catch (error) {
+      // 네트워크 에러 시 롤백
+      setLiked(false);
+      setLikesCount((prev) => prev - 1);
+      console.error("Like request failed:", error);
+    }
+  }, [liked, post.post_id]);
 
   // 공유 버튼 클릭 핸들러 (URL 복사)
   const handleShareClick = async () => {
@@ -108,37 +144,30 @@ export function PostCard({ post, isLiked = false }: PostCardProps) {
         </button>
       </header>
 
-      {/* 이미지 영역 (1:1 정사각형) */}
-      <div className="w-full aspect-square relative bg-gray-100">
-        <Image
-          src={post.image_url}
-          alt={post.caption || "게시물 이미지"}
-          fill
-          className="object-cover"
-          sizes="(max-width: 768px) 100vw, 630px"
-          unoptimized={post.image_url.startsWith("http")} // 외부 URL인 경우 unoptimized
-        />
-      </div>
+      {/* 이미지 영역 (1:1 정사각형) - 더블탭 좋아요 */}
+      <DoubleTapHeart onDoubleTap={handleDoubleTap}>
+        <div className="w-full aspect-square relative bg-gray-100">
+          <Image
+            src={post.image_url}
+            alt={post.caption || "게시물 이미지"}
+            fill
+            className="object-cover"
+            sizes="(max-width: 768px) 100vw, 630px"
+            unoptimized={post.image_url.startsWith("http")} // 외부 URL인 경우 unoptimized
+          />
+        </div>
+      </DoubleTapHeart>
 
       {/* 액션 버튼 영역 (48px) */}
       <div className="flex items-center justify-between px-4 h-12">
         <div className="flex items-center gap-4">
           {/* 좋아요 버튼 */}
-          <button
-            onClick={handleLikeClick}
-            className="hover:opacity-70 transition-opacity"
-            aria-label="좋아요"
-          >
-            <Heart
-              size={24}
-              className={liked ? "fill-current" : ""}
-              style={{
-                color: liked
-                  ? "var(--color-instagram-like)"
-                  : "var(--color-instagram-text-primary)",
-              }}
-            />
-          </button>
+          <LikeButton
+            postId={post.post_id}
+            initialLiked={liked}
+            initialCount={likesCount}
+            onLikeChange={handleLikeChange}
+          />
           {/* 댓글 버튼 */}
           <Link
             href={`/post/${post.post_id}`}
@@ -175,13 +204,9 @@ export function PostCard({ post, isLiked = false }: PostCardProps) {
       </div>
 
       {/* 좋아요 수 */}
-      {likesCount > 0 && (
-        <div className="px-4 pb-2">
-          <p className="text-sm font-semibold" style={{ color: 'var(--color-instagram-text-primary)' }}>
-            좋아요 {likesCount.toLocaleString()}개
-          </p>
-        </div>
-      )}
+      <div className="px-4 pb-2">
+        <LikeCount count={likesCount} />
+      </div>
 
       {/* 캡션 영역 */}
       {post.caption && (
@@ -242,4 +267,3 @@ export function PostCard({ post, isLiked = false }: PostCardProps) {
     </article>
   );
 }
-

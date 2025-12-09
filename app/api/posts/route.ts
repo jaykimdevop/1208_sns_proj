@@ -10,13 +10,16 @@
  * 3. comments 테이블 조인 (최신 2개, created_at DESC)
  * 4. limit, offset으로 페이지네이션
  * 5. userId 파라미터가 있으면 해당 사용자의 게시물만 필터링
+ * 6. 현재 사용자의 좋아요 여부 (isLiked) 포함
  *
  * @dependencies
+ * - @clerk/nextjs/server: auth()
  * - lib/supabase/server: createClerkSupabaseClient
  * - lib/types: PostWithStats, CommentWithUser, PostsResponse
  */
 
 import { NextRequest, NextResponse } from "next/server";
+import { auth } from "@clerk/nextjs/server";
 import { createClerkSupabaseClient } from "@/lib/supabase/server";
 import type {
   PostWithStats,
@@ -28,6 +31,19 @@ export async function GET(request: NextRequest) {
   try {
     const supabase = createClerkSupabaseClient();
     const searchParams = request.nextUrl.searchParams;
+
+    // 현재 로그인한 사용자 정보 가져오기 (좋아요 여부 확인용)
+    const { userId: clerkUserId } = await auth();
+    let currentUserId: string | null = null;
+
+    if (clerkUserId) {
+      const { data: currentUser } = await supabase
+        .from("users")
+        .select("id")
+        .eq("clerk_id", clerkUserId)
+        .single();
+      currentUserId = currentUser?.id || null;
+    }
 
     // 쿼리 파라미터 파싱
     const limit = parseInt(searchParams.get("limit") || "10", 10);
@@ -135,6 +151,20 @@ export async function GET(request: NextRequest) {
       }
     });
 
+    // 현재 사용자의 좋아요 여부 조회
+    let likedPostIds = new Set<string>();
+    if (currentUserId) {
+      const { data: userLikes } = await supabase
+        .from("likes")
+        .select("post_id")
+        .eq("user_id", currentUserId)
+        .in("post_id", postIds);
+
+      if (userLikes) {
+        likedPostIds = new Set(userLikes.map((like: any) => like.post_id));
+      }
+    }
+
     // 게시물 데이터 형식 변환
     const postsWithComments = postsData.map((post: any) => {
       const postComments = commentsByPostId.get(post.post_id) || [];
@@ -160,12 +190,14 @@ export async function GET(request: NextRequest) {
         comments_count: post.comments_count || 0,
         user: usersMap.get(post.user_id) || null,
         comments: formattedComments,
+        isLiked: likedPostIds.has(post.post_id),
       };
     });
 
     // 타입 안전성을 위한 형식 변환
     const formattedPosts: (PostWithStats & {
       comments: CommentWithUser[];
+      isLiked: boolean;
     })[] = postsWithComments.map((post) => ({
       post_id: post.post_id,
       user_id: post.user_id,
@@ -176,6 +208,7 @@ export async function GET(request: NextRequest) {
       comments_count: post.comments_count || 0,
       user: post.user,
       comments: post.comments,
+      isLiked: post.isLiked,
     }));
 
     const hasMore = count ? offset + limit < count : false;
