@@ -38,7 +38,13 @@ import { formatRelativeTime } from "@/lib/utils/formatRelativeTime";
 import { LikeButton, LikeCount } from "@/components/post/LikeButton";
 import { DoubleTapHeart } from "@/components/post/DoubleTapHeart";
 import { CommentForm, type CommentFormRef } from "@/components/comment/CommentForm";
-import { PostModal } from "@/components/post/post-modal";
+import dynamic from "next/dynamic";
+
+// 코드 스플리팅: PostModal을 동적 import
+const PostModal = dynamic(
+  () => import("@/components/post/post-modal").then((mod) => ({ default: mod.PostModal })),
+  { ssr: false }
+);
 import { checkMediaQuery } from "@/hooks/use-media-query";
 import { toast } from "sonner";
 import {
@@ -359,7 +365,7 @@ function PostCardComponent({ post, onPostDeleted }: PostCardProps) {
           <DropdownMenuTrigger asChild>
             <button
               className="p-1 hover-scale transition-all"
-              aria-label="더보기"
+              aria-label={isOwnPost ? "게시물 메뉴 (삭제 옵션)" : "게시물 메뉴 (공유 옵션)"}
             >
               <MoreHorizontal
                 size={20}
@@ -397,7 +403,13 @@ function PostCardComponent({ post, onPostDeleted }: PostCardProps) {
           onClick={handleOpenDetail}
           role="button"
           tabIndex={0}
-          onKeyDown={(e) => e.key === "Enter" && handleOpenDetail()}
+          aria-label={`${post.user?.name || "사용자"}의 게시물 보기`}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              handleOpenDetail();
+            }
+          }}
         >
           <Image
             src={post.image_url}
@@ -406,12 +418,12 @@ function PostCardComponent({ post, onPostDeleted }: PostCardProps) {
             className="object-cover"
             sizes="(max-width: 768px) 100vw, 630px"
             loading="lazy"
-            onError={(e) => {
-              // 이미지 로드 실패 시 fallback 처리
-              const target = e.target as HTMLImageElement;
-              target.style.display = "none";
-              // TODO: 기본 이미지 fallback 추가
-            }}
+              onError={(e) => {
+                // 이미지 로드 실패 시 fallback 처리
+                const target = e.target as HTMLImageElement;
+                target.style.display = "none";
+                // 향후 기본 이미지 fallback 추가 예정
+              }}
           />
         </div>
       </DoubleTapHeart>
@@ -449,12 +461,13 @@ function PostCardComponent({ post, onPostDeleted }: PostCardProps) {
             />
           </button>
         </div>
-        {/* 북마크 버튼 */}
+          {/* 북마크 버튼 */}
         <button
           onClick={handleBookmarkClick}
           className="hover:opacity-70 transition-opacity disabled:opacity-50"
-          aria-label={bookmarked ? "저장 취소" : "저장"}
+          aria-label={bookmarked ? "저장 취소" : "게시물 저장"}
           disabled={isBookmarkLoading}
+          aria-busy={isBookmarkLoading}
         >
           {bookmarked ? (
             <BookmarkCheck

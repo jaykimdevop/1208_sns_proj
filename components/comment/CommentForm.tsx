@@ -19,7 +19,7 @@
  * - lib/types: CommentWithUser, CreateCommentResponse
  */
 
-import { useState, useCallback, useRef, forwardRef, useImperativeHandle, useEffect, memo } from "react";
+import { useState, useCallback, useRef, forwardRef, useImperativeHandle, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
 import { Loader2, X } from "lucide-react";
@@ -180,8 +180,11 @@ export const CommentForm = forwardRef<CommentFormRef, CommentFormProps>(
         {/* 답글 모드 표시 */}
         {activeReplyTo && (
           <div
+            id="reply-mode-indicator"
             className="flex items-center justify-between px-4 py-2 animate-slide-down"
             style={{ backgroundColor: "var(--color-cute-peach)", borderBottom: "2px dashed var(--color-cute-border)" }}
+            role="status"
+            aria-live="polite"
           >
             <span
               className="text-xs"
@@ -228,6 +231,14 @@ export const CommentForm = forwardRef<CommentFormRef, CommentFormProps>(
             }
             disabled={isSubmitting}
             readOnly={!isSignedIn}
+            aria-label={
+              activeReplyTo
+                ? `${activeReplyTo.user?.name || "사용자"}님에게 답글 입력`
+                : "댓글 입력"
+            }
+            aria-describedby={activeReplyTo ? "reply-mode-indicator" : undefined}
+            aria-invalid={!!error}
+            aria-required="false"
             className="flex-1 text-sm bg-transparent border-none outline-none placeholder:text-gray-400 disabled:opacity-50 cursor-pointer sketch-input px-3 py-2"
             style={{ color: "var(--color-cute-border)" }}
           />
@@ -235,6 +246,8 @@ export const CommentForm = forwardRef<CommentFormRef, CommentFormProps>(
             type="button"
             onClick={handleSubmit}
             disabled={(!hasContent || isSubmitting) && isSignedIn}
+            aria-label={isSubmitting ? "댓글 게시 중" : activeReplyTo ? "답글 게시" : "댓글 게시"}
+            aria-busy={isSubmitting}
             className="text-sm font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 sketch-button px-3 py-1"
             style={{
               backgroundColor: hasContent || !isSignedIn ? "var(--color-cute-pink)" : "transparent",

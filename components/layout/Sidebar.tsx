@@ -15,12 +15,22 @@
  */
 
 import { useState } from "react";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Home, Search, PlusSquare, User, LogIn } from "lucide-react";
 import { useUser } from "@clerk/nextjs";
-import { CreatePostModal } from "@/components/post/CreatePostModal";
-import { SearchModal } from "@/components/search/search-modal";
+
+// 코드 스플리팅: 모달 컴포넌트를 동적 import
+const CreatePostModal = dynamic(
+  () => import("@/components/post/CreatePostModal").then((mod) => ({ default: mod.CreatePostModal })),
+  { ssr: false }
+);
+
+const SearchModal = dynamic(
+  () => import("@/components/search/search-modal").then((mod) => ({ default: mod.SearchModal })),
+  { ssr: false }
+);
 
 interface NavItem {
   href: string;
@@ -106,6 +116,7 @@ export function Sidebar() {
           onMouseEnter={() => setHoveredItem(item.href)}
           onMouseLeave={() => setHoveredItem(null)}
           className="w-full flex items-center gap-4 px-3 py-3 rounded-xl transition-all duration-300 cursor-pointer"
+          aria-label={item.label}
           style={{
             color: 'var(--color-instagram-text-primary)',
             background: getBackgroundStyle(),
@@ -141,6 +152,7 @@ export function Sidebar() {
           onMouseEnter={() => setHoveredItem(item.href)}
           onMouseLeave={() => setHoveredItem(null)}
           className="w-full flex items-center gap-4 px-3 py-3 rounded-xl transition-all duration-300 cursor-pointer"
+          aria-label={item.label}
           style={{
             color: 'var(--color-instagram-text-primary)',
             background: getBackgroundStyle(),
@@ -234,7 +246,8 @@ export function Sidebar() {
           onClick={() => setIsCreateModalOpen(true)}
           onMouseEnter={() => setHoveredItem(`tablet-${item.href}`)}
           onMouseLeave={() => setHoveredItem(null)}
-          className="flex items-center justify-center p-3 rounded-xl transition-all duration-300 cursor-pointer"
+          className="w-full flex items-center justify-center py-3 rounded-xl transition-all duration-300 cursor-pointer"
+          aria-label={item.label}
           style={{
             color: 'var(--color-instagram-text-primary)',
             background: getBackgroundStyle(),
@@ -244,6 +257,7 @@ export function Sidebar() {
         >
           <Icon
             size={24}
+            className="flex-shrink-0"
             style={{
               transform: isHovered ? 'scale(1.15) rotate(-5deg)' : 'none',
               transition: 'transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
@@ -261,7 +275,8 @@ export function Sidebar() {
           onClick={() => setIsSearchModalOpen(true)}
           onMouseEnter={() => setHoveredItem(`tablet-${item.href}`)}
           onMouseLeave={() => setHoveredItem(null)}
-          className="flex items-center justify-center p-3 rounded-xl transition-all duration-300 cursor-pointer"
+          className="w-full flex items-center justify-center py-3 rounded-xl transition-all duration-300 cursor-pointer"
+          aria-label={item.label}
           style={{
             color: 'var(--color-instagram-text-primary)',
             background: getBackgroundStyle(),
@@ -271,6 +286,7 @@ export function Sidebar() {
         >
           <Icon
             size={24}
+            className="flex-shrink-0"
             style={{
               transform: isHovered ? 'scale(1.15) rotate(-5deg)' : 'none',
               transition: 'transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
@@ -286,7 +302,9 @@ export function Sidebar() {
         href={href}
         onMouseEnter={() => setHoveredItem(`tablet-${item.href}`)}
         onMouseLeave={() => setHoveredItem(null)}
-        className="flex items-center justify-center p-3 rounded-xl transition-all duration-300"
+        className="w-full flex items-center justify-center py-3 rounded-xl transition-all duration-300"
+        aria-label={item.label}
+        aria-current={isActive ? "page" : undefined}
         style={{
           color: 'var(--color-instagram-text-primary)',
           background: getBackgroundStyle(),
@@ -296,7 +314,7 @@ export function Sidebar() {
       >
         <Icon
           size={24}
-          className={isActive ? "fill-current" : ""}
+          className={`flex-shrink-0 ${isActive ? "fill-current" : ""}`}
           style={{
             transform: isHovered ? 'scale(1.15) rotate(-5deg)' : 'none',
             transition: 'transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',

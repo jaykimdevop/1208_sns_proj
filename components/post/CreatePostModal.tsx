@@ -316,6 +316,15 @@ export function CreatePostModal({
               onDragLeave={handleDragLeave}
               onDrop={handleDrop}
               onClick={() => fileInputRef.current?.click()}
+              role="button"
+              tabIndex={0}
+              aria-label="이미지 업로드 영역 (드래그 앤 드롭 또는 클릭)"
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  fileInputRef.current?.click();
+                }
+              }}
             >
               <ImagePlus
                 size={64}
@@ -352,6 +361,7 @@ export function CreatePostModal({
                   e.stopPropagation();
                   fileInputRef.current?.click();
                 }}
+                aria-label="컴퓨터에서 이미지 파일 선택"
               >
                 💾 컴퓨터에서 선택
               </button>
@@ -361,6 +371,7 @@ export function CreatePostModal({
                 accept="image/jpeg,image/png,image/webp,image/gif"
                 className="hidden"
                 onChange={handleFileInputChange}
+                aria-label="이미지 파일 선택"
               />
             </div>
           ) : (
@@ -397,6 +408,8 @@ export function CreatePostModal({
                 value={caption}
                 onChange={(e) => setCaption(e.target.value.slice(0, MAX_CAPTION_LENGTH))}
                 placeholder="✍️ 문구 입력..."
+                aria-label="게시물 캡션 입력"
+                aria-describedby="caption-counter-create"
                 className="sketch-input w-full h-24 resize-none p-3 text-sm"
                 style={{
                   color: "var(--color-cute-border)",
@@ -405,8 +418,11 @@ export function CreatePostModal({
                 maxLength={MAX_CAPTION_LENGTH}
               />
               <div
+                id="caption-counter-create"
                 className="text-xs text-right mt-1 font-semibold"
                 style={{ color: "var(--color-instagram-text-secondary)" }}
+                role="status"
+                aria-live="polite"
               >
                 {caption.length}/{MAX_CAPTION_LENGTH}
               </div>

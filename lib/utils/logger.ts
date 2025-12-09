@@ -48,13 +48,13 @@ class LoggerImpl implements Logger {
   private isDevelopment = process.env.NODE_ENV === "development";
 
   private log(level: LogLevel, message: string, context?: LogContext): void {
-    const timestamp = new Date().toISOString();
-    const logEntry = {
-      timestamp,
-      level,
-      message,
-      ...(context && { context: this.sanitizeContext(context) }),
-    };
+    // 구조화된 로그 엔트리 (향후 에러 추적 서비스로 전송 가능)
+    // const logEntry = {
+    //   timestamp: new Date().toISOString(),
+    //   level,
+    //   message,
+    //   ...(context && { context: this.sanitizeContext(context) }),
+    // };
 
     // 개발 환경: 콘솔에 상세 로그 출력
     if (this.isDevelopment) {
@@ -63,10 +63,10 @@ class LoggerImpl implements Logger {
     }
 
     // 프로덕션 환경: 구조화된 로그 (향후 에러 추적 서비스로 전송 가능)
-    // TODO: Sentry, LogRocket 등 에러 추적 서비스 연동
+    // 향후 Sentry, LogRocket 등 에러 추적 서비스 연동 예정
     if (level === LogLevel.ERROR) {
       // 프로덕션에서 에러만 별도 처리
-      this.logError(logEntry);
+      this.logError();
     }
   }
 
@@ -113,7 +113,7 @@ class LoggerImpl implements Logger {
   /**
    * 에러 로그를 별도로 처리합니다.
    */
-  private logError(logEntry: Record<string, unknown>): void {
+  private logError(): void {
     // 프로덕션에서는 에러 추적 서비스로 전송
     // 예: Sentry.captureException(error)
     if (!this.isDevelopment) {

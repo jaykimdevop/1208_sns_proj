@@ -24,7 +24,13 @@ import {
 } from "@/components/ui/dialog";
 import { UserSearchResult } from "./user-search-result";
 import { PostSearchResult } from "./post-search-result";
-import { PostModal } from "@/components/post/post-modal";
+import dynamic from "next/dynamic";
+
+// 코드 스플리팅: PostModal을 동적 import
+const PostModal = dynamic(
+  () => import("@/components/post/post-modal").then((mod) => ({ default: mod.PostModal })),
+  { ssr: false }
+);
 import { handleApiError, handleFetchError } from "@/lib/utils/error-handler";
 import type { SearchResponse, SearchUserResult, SearchPostResult } from "@/lib/types";
 
@@ -144,7 +150,7 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
         clearTimeout(timeoutId);
 
         if (!response.ok) {
-          const apiError = await handleApiError(response, "performSearch");
+          await handleApiError(response, "performSearch");
           // 검색 에러는 조용히 처리 (사용자에게는 빈 결과 표시)
           if (isInitialSearch) {
             setUsers([]);
@@ -195,7 +201,7 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
         if (error instanceof Error && error.name === "AbortError") {
           return;
         }
-        const apiError = handleFetchError(error, "performSearch");
+        handleFetchError(error, "performSearch");
         // 검색 에러는 조용히 처리 (사용자에게는 빈 결과 표시)
         if (isInitialSearch) {
           setUsers([]);
@@ -257,13 +263,13 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
   };
 
   // 더 보기
-  const handleLoadMore = () => {
+  const handleLoadMore = useCallback(() => {
     if (activeTab === "users" && hasMoreUsers && !isLoadingMore) {
       performSearch(query, "users", usersOffset);
     } else if (activeTab === "posts" && hasMorePosts && !isLoadingMore) {
       performSearch(query, "posts", postsOffset);
     }
-  };
+  }, [activeTab, hasMoreUsers, hasMorePosts, isLoadingMore, performSearch, query, usersOffset, postsOffset]);
 
   // 스크롤 이벤트로 무한 스크롤
   const handleScroll = useCallback(() => {
@@ -288,7 +294,6 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
 
   // 현재 탭의 결과
   const currentResults = activeTab === "users" ? users : posts;
-  const currentCount = activeTab === "users" ? usersCount : postsCount;
   const hasMore = activeTab === "users" ? hasMoreUsers : hasMorePosts;
 
   return (
@@ -330,6 +335,7 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="검색어를 입력하세요..."
+                aria-label="검색어 입력"
                 className="sketch-input w-full pl-10 pr-10 py-3 text-sm"
                 style={{
                   color: "var(--color-cute-border)",
@@ -339,6 +345,7 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
               {query && (
                 <button
                   onClick={() => setQuery("")}
+                  aria-label="검색어 지우기"
                   className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-gray-100 transition-colors"
                 >
                   <X
@@ -357,6 +364,8 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
           >
             <button
               onClick={() => handleTabChange("users")}
+              aria-label="사용자 검색 탭"
+              aria-pressed={activeTab === "users"}
               className={`profile-tab flex-1 flex items-center justify-center gap-2 py-3 transition-all ${
                 activeTab === "users" ? "profile-tab-active" : ""
               }`}
@@ -368,6 +377,8 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
             </button>
             <button
               onClick={() => handleTabChange("posts")}
+              aria-label="게시물 검색 탭"
+              aria-pressed={activeTab === "posts"}
               className={`profile-tab flex-1 flex items-center justify-center gap-2 py-3 transition-all ${
                 activeTab === "posts" ? "profile-tab-active" : ""
               }`}

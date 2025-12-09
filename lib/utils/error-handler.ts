@@ -149,7 +149,7 @@ export async function handleApiError(
   context?: string
 ): Promise<ApiError> {
   let errorData: { error?: string; message?: string } = {};
-  let statusCode = response.status;
+  const statusCode = response.status;
 
   try {
     const contentType = response.headers.get("content-type");

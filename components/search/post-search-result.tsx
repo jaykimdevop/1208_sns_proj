@@ -13,7 +13,6 @@
  */
 
 import Image from "next/image";
-import Link from "next/link";
 import { Heart, MessageCircle } from "lucide-react";
 import type { SearchPostResult } from "@/lib/types";
 import { useMediaQuery } from "@/hooks/use-media-query";
@@ -92,6 +91,7 @@ export function PostSearchResult({
     <button
       onClick={handleClick}
       className="w-full flex items-start gap-3 p-3 rounded-xl transition-all duration-300 hover:scale-[1.02] text-left"
+      aria-label={`${post.user.name}의 게시물 보기`}
       style={{
         background: "transparent",
       }}

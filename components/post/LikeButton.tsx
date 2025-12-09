@@ -111,6 +111,8 @@ function LikeButtonComponent({
       disabled={isLoading}
       className={`hover-scale heart-pulse transition-all ${isAnimating ? "animate-like-bounce" : ""}`}
       aria-label={liked ? "좋아요 취소" : "좋아요"}
+      aria-pressed={liked}
+      aria-busy={isLoading}
     >
       <Heart
         size={24}

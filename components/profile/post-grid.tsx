@@ -22,7 +22,13 @@ import { useState, useCallback, memo } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Heart, MessageCircle, Grid3X3 } from "lucide-react";
-import { PostModal } from "@/components/post/post-modal";
+import dynamic from "next/dynamic";
+
+// 코드 스플리팅: PostModal을 동적 import
+const PostModal = dynamic(
+  () => import("@/components/post/post-modal").then((mod) => ({ default: mod.PostModal })),
+  { ssr: false }
+);
 import type { PostWithStats, CommentWithUser } from "@/lib/types";
 
 // 게시물 타입 (그리드용)
@@ -129,6 +135,7 @@ function PostGridComponent({
             key={post.post_id}
             onClick={() => handlePostClick(index)}
             className="relative aspect-square group overflow-hidden sketch-card hover-scale"
+            aria-label={`${post.user?.name || "사용자"}의 게시물 보기`}
             style={{
               opacity: 0,
               animation: `slide-up 0.4s ease-out forwards`,
@@ -147,7 +154,7 @@ function PostGridComponent({
                 // 이미지 로드 실패 시 fallback 처리
                 const target = e.target as HTMLImageElement;
                 target.style.display = "none";
-                // TODO: 기본 이미지 fallback 추가
+                // 향후 기본 이미지 fallback 추가 예정
               }}
             />
 

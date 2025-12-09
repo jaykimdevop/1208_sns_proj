@@ -58,6 +58,7 @@ export function UserSearchResult({ user, onSelect }: UserSearchResultProps) {
       href={`/profile/${user.clerk_id}`}
       onClick={onSelect}
       className="flex items-center gap-3 p-3 rounded-xl transition-all duration-300 hover:scale-[1.02]"
+      aria-label={`${user.name} 프로필 보기`}
       style={{
         background: "transparent",
       }}

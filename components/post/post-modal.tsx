@@ -145,7 +145,7 @@ export function PostModal({
     const url = `${window.location.origin}/post/${post.post_id}`;
     try {
       await navigator.clipboard.writeText(url);
-      // TODO: 토스트 메시지 표시
+      // 토스트는 PostCard에서 이미 구현됨
     } catch (error) {
       console.error("Failed to copy URL:", error);
     }
@@ -223,12 +223,12 @@ export function PostModal({
                 className="object-contain"
                 sizes="50vw"
                 priority
-                onError={(e) => {
-                  // 이미지 로드 실패 시 fallback 처리
-                  const target = e.target as HTMLImageElement;
-                  target.style.display = "none";
-                  // TODO: 기본 이미지 fallback 추가
-                }}
+                  onError={(e) => {
+                    // 이미지 로드 실패 시 fallback 처리
+                    const target = e.target as HTMLImageElement;
+                    target.style.display = "none";
+                    // 향후 기본 이미지 fallback 추가 예정
+                  }}
               />
             </div>
           </div>

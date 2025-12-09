@@ -122,6 +122,16 @@ export function FollowButton({
     return baseClasses;
   };
 
+  const getAriaLabel = () => {
+    if (isLoading) {
+      return isFollowing ? "언팔로우 처리 중" : "팔로우 처리 중";
+    }
+    if (isFollowing) {
+      return isHovered ? "언팔로우" : "팔로잉 중";
+    }
+    return "팔로우";
+  };
+
   return (
     <Button
       variant={getButtonVariant()}
@@ -131,6 +141,9 @@ export function FollowButton({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       disabled={isLoading}
+      aria-label={getAriaLabel()}
+      aria-pressed={isFollowing}
+      aria-busy={isLoading}
       style={{
         backgroundColor: !isFollowing ? "var(--color-cute-pink)" : undefined,
         borderColor: isFollowing && !isHovered ? "var(--color-cute-border)" : undefined,

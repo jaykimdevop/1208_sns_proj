@@ -6,27 +6,20 @@
  *
  * Mobile 전용 헤더:
  * - 높이: 60px
- * - 로고 + 프로필 아이콘 (로그인 시) 또는 로그인 버튼 (미로그인 시)
+ * - 로고 + 버전 정보 (로그인 시) 또는 로그인 버튼 (미로그인 시)
  * - Desktop/Tablet에서는 숨김
+ * - 모바일에서는 하단 네비게이션에 프로필 아이콘이 있으므로 헤더에는 프로필 아이콘 제거
  *
  * @dependencies
- * - lucide-react: 아이콘
  * - @clerk/nextjs: useUser 훅
  */
 
 import Link from "next/link";
-import { User, LogIn } from "lucide-react";
+import { LogIn } from "lucide-react";
 import { useUser } from "@clerk/nextjs";
 
 export function Header() {
-  const { user, isSignedIn } = useUser();
-
-  const getProfileHref = () => {
-    if (user?.id) {
-      return `/profile/${user.id}`;
-    }
-    return "/sign-in";
-  };
+  const { isSignedIn } = useUser();
 
   return (
     <header className="md:hidden fixed top-0 left-0 right-0 h-[60px] bg-white border-b-4 border-dashed z-50 flex items-center justify-between px-4 animate-slide-in-top" style={{ borderColor: 'var(--color-cute-border)', background: 'linear-gradient(180deg, #FFF5F5 0%, #FFFFFF 100%)' }}>
@@ -35,18 +28,18 @@ export function Header() {
         ✏️ Instasketch
       </Link>
 
-      {/* 아이콘들 */}
+      {/* 우측 영역 */}
       <div className="flex items-center gap-4">
         {isSignedIn ? (
-          <Link
-            href={getProfileHref()}
-            className="hover-scale transition-all"
-            style={{ color: 'var(--color-cute-border)' }}
-            aria-label="프로필"
+          // 로그인 시: 버전 정보 표시
+          <span
+            className="text-xs"
+            style={{ color: 'var(--color-instagram-text-secondary)' }}
           >
-            <User size={24} />
-          </Link>
+            Instasketch Beta Ver 1.0
+          </span>
         ) : (
+          // 미로그인 시: 로그인 버튼
           <Link
             href="/sign-in"
             className="flex items-center gap-1 px-3 py-1.5 sketch-button text-sm font-semibold transition-all"

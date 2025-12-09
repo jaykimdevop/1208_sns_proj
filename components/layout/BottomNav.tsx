@@ -17,12 +17,22 @@
  */
 
 import { useState } from "react";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Home, Search, PlusSquare, User, LogIn } from "lucide-react";
 import { useUser } from "@clerk/nextjs";
-import { CreatePostModal } from "@/components/post/CreatePostModal";
-import { SearchModal } from "@/components/search/search-modal";
+
+// 코드 스플리팅: 모달 컴포넌트를 동적 import
+const CreatePostModal = dynamic(
+  () => import("@/components/post/CreatePostModal").then((mod) => ({ default: mod.CreatePostModal })),
+  { ssr: false }
+);
+
+const SearchModal = dynamic(
+  () => import("@/components/search/search-modal").then((mod) => ({ default: mod.SearchModal })),
+  { ssr: false }
+);
 
 interface NavItem {
   href: string;

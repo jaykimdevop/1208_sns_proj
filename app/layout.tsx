@@ -21,6 +21,7 @@ import { SyncUserProvider } from "@/components/providers/sync-user-provider";
 import { customKoKR } from "@/lib/clerk/localization";
 import { Toaster } from "@/components/ui/sonner";
 import { ErrorBoundary } from "@/components/error-boundary";
+import { OfflineBanner, OnlineBanner } from "@/components/offline-banner";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -75,9 +76,21 @@ export default function RootLayout({
               </filter>
             </defs>
           </svg>
+          {/* 스킵 링크 (접근성) */}
+          <a
+            href="#main-content"
+            className="absolute -top-40 left-4 z-50 px-4 py-2 bg-primary text-primary-foreground rounded-md outline-none ring-2 ring-ring focus:top-4 transition-top duration-200"
+            style={{ color: "white", backgroundColor: "var(--color-cute-pink)" }}
+          >
+            메인 콘텐츠로 건너뛰기
+          </a>
+          <OfflineBanner />
+          <OnlineBanner />
           <ErrorBoundary>
             <SyncUserProvider>
-              {children}
+              <main id="main-content">
+                {children}
+              </main>
             </SyncUserProvider>
           </ErrorBoundary>
           <Toaster position="bottom-center" />
