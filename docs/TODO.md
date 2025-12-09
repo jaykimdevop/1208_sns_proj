@@ -136,21 +136,24 @@
 
 ## Phase 6. 댓글 기능
 
-- [ ] `components/comment/CommentList.tsx`
-  - [ ] 댓글 목록 렌더링
-  - [ ] PostCard: 최신 2개만 표시
-  - [ ] 상세 모달: 전체 댓글 + 스크롤
-  - [ ] 삭제 버튼 (본인만 표시)
-- [ ] `components/comment/CommentForm.tsx`
-  - [ ] 댓글 입력 필드 ("댓글 달기...")
-  - [ ] Enter 키 또는 "게시" 버튼으로 제출
-- [ ] `app/api/comments/route.ts`
-  - [ ] POST: 댓글 작성
-  - [ ] DELETE: 댓글 삭제 (본인만)
-  - [ ] 인증 검증 (Clerk)
-- [ ] PostCard에 댓글 기능 통합
-  - [ ] CommentList 통합
-  - [ ] CommentForm 통합
+- [x] `lib/types.ts`
+  - [x] CreateCommentResponse 타입 추가
+  - [x] DeleteCommentRequest 타입 추가
+  - [x] DeleteCommentResponse 타입 추가
+- [x] `app/api/comments/route.ts`
+  - [x] POST: 댓글 작성 (Clerk 인증, 사용자 정보 포함 응답)
+  - [x] DELETE: 댓글 삭제 (본인만, Clerk 인증)
+- [x] `components/comment/CommentForm.tsx`
+  - [x] 댓글 입력 필드 ("댓글 달기...")
+  - [x] Enter 키로 제출
+  - [x] "게시" 버튼 (텍스트 있을 때만 활성화)
+  - [x] 로딩 상태 표시
+  - [x] forwardRef로 ref 노출 (외부에서 포커스 가능)
+- [x] PostCard에 댓글 기능 통합
+  - [x] 댓글 상태 관리 (comments, commentsCount)
+  - [x] CommentForm 통합
+  - [x] 새 댓글 추가 시 실시간 업데이트
+  - [x] 댓글 버튼 클릭 시 댓글 입력창으로 포커스 이동
 
 ## Phase 7. 게시물 상세 모달
 
@@ -162,6 +165,9 @@
 - [ ] PostCard 클릭 시 PostModal 열기
   - [ ] 게시물 상세 정보 로드
   - [ ] 댓글 전체 목록 표시
+- [ ] `components/comment/CommentList.tsx`
+  - [ ] 상세 모달: 전체 댓글 + 스크롤
+  - [ ] 삭제 버튼 (본인만 표시)
 
 ## Phase 8. 프로필 페이지
 

@@ -234,6 +234,30 @@ export interface CreatePostResponse {
   error?: string;
 }
 
+/**
+ * 댓글 생성 API 응답 타입
+ */
+export interface CreateCommentResponse {
+  success: boolean;
+  comment?: CommentWithUser;
+  error?: string;
+}
+
+/**
+ * 댓글 삭제 API 요청 타입
+ */
+export interface DeleteCommentRequest {
+  comment_id: string;
+}
+
+/**
+ * 댓글 삭제 API 응답 타입
+ */
+export interface DeleteCommentResponse {
+  success: boolean;
+  error?: string;
+}
+
 // ============================================
 // 페이지네이션 타입
 // ============================================

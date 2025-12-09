@@ -21,6 +21,7 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import Image from "next/image";
 import { ImagePlus, X, Loader2 } from "lucide-react";
+import { useSetAtom } from "jotai";
 import {
   Dialog,
   DialogContent,
@@ -28,7 +29,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import type { CreatePostResponse } from "@/lib/types";
+import { postsAtom, type PostItem } from "@/states/posts-atom";
+import type { CreatePostResponse, PostsResponse } from "@/lib/types";
 
 // ============================================
 // 상수 정의
@@ -72,6 +74,9 @@ export function CreatePostModal({
 
   // refs
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // 전역 상태 업데이트
+  const setPosts = useSetAtom(postsAtom);
 
   // 모달이 닫힐 때 상태 초기화
   useEffect(() => {
@@ -209,6 +214,49 @@ export function CreatePostModal({
         throw new Error(data.error || "게시물 업로드에 실패했습니다.");
       }
 
+      // 새로 생성된 게시물의 전체 정보 가져오기
+      // 게시물 생성은 성공했으므로, 이 단계 실패는 무시하고 모달은 닫음
+      try {
+        // AbortController로 타임아웃 설정 (5초)
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+        const postsResponse = await fetch("/api/posts?limit=1&offset=0", {
+          signal: controller.signal,
+        });
+
+        clearTimeout(timeoutId);
+
+        if (postsResponse.ok) {
+          const postsData: PostsResponse = await postsResponse.json();
+          if (postsData.data && postsData.data.length > 0) {
+            const newPost = postsData.data[0] as PostItem;
+            // 전역 상태에 새 게시물 추가 (맨 앞에)
+            setPosts((prev) => {
+              // 중복 체크
+              if (prev.find((p) => p.post_id === newPost.post_id)) {
+                return prev;
+              }
+              return [newPost, ...prev];
+            });
+          }
+        } else {
+          console.warn("Failed to fetch new post: HTTP", postsResponse.status);
+        }
+      } catch (fetchError) {
+        // 네트워크 오류, 타임아웃 등은 무시 (게시물은 이미 생성됨)
+        if (fetchError instanceof Error) {
+          if (fetchError.name === "AbortError") {
+            console.warn("Timeout while fetching new post");
+          } else {
+            console.warn("Error fetching new post:", fetchError.message);
+          }
+        } else {
+          console.warn("Unknown error fetching new post:", fetchError);
+        }
+        // 게시물 생성은 성공했으므로, 새 게시물 가져오기 실패는 무시하고 진행
+      }
+
       // 성공 시 모달 닫기 및 콜백 호출
       onOpenChange(false);
       onPostCreated?.();
@@ -220,7 +268,7 @@ export function CreatePostModal({
     } finally {
       setIsUploading(false);
     }
-  }, [selectedFile, caption, onOpenChange, onPostCreated]);
+  }, [selectedFile, caption, onOpenChange, onPostCreated, setPosts]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

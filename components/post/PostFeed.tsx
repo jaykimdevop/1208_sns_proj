@@ -6,22 +6,22 @@
  *
  * 게시물 목록을 표시하고 무한 스크롤을 통해 페이지네이션을 지원합니다.
  * Intersection Observer API를 사용하여 하단 도달 시 자동으로 다음 페이지를 로드합니다.
+ * 전역 상태(jotai)를 사용하여 새 게시물이 즉시 피드에 표시됩니다.
  *
  * @dependencies
  * - components/post/PostCard: 게시물 카드 컴포넌트
  * - components/post/PostCardSkeleton: 로딩 스켈레톤
  * - app/api/posts/route: 게시물 목록 조회 API
  * - lib/types: PostsResponse, PostWithStats
+ * - states/posts-atom: 전역 게시물 상태
  */
 
 import { useEffect, useRef, useState, useCallback } from "react";
+import { useAtom } from "jotai";
 import { PostCard } from "./PostCard";
 import { PostCardSkeleton } from "./PostCardSkeleton";
-import type {
-  PostsResponse,
-  PostWithStats,
-  CommentWithUser,
-} from "@/lib/types";
+import { postsAtom, type PostItem } from "@/states/posts-atom";
+import type { PostsResponse } from "@/lib/types";
 
 interface PostFeedProps {
   initialPosts?: PostsResponse;
@@ -29,14 +29,22 @@ interface PostFeedProps {
 }
 
 export function PostFeed({ initialPosts, userId }: PostFeedProps) {
-  const [posts, setPosts] = useState<
-    (PostWithStats & { comments: CommentWithUser[]; isLiked: boolean })[]
-  >((initialPosts?.data as (PostWithStats & { comments: CommentWithUser[]; isLiked: boolean })[]) || []);
+  // 전역 상태 사용
+  const [posts, setPosts] = useAtom(postsAtom);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(initialPosts?.hasMore ?? true);
   const [offset, setOffset] = useState(initialPosts?.data?.length || 0);
   const [error, setError] = useState<string | null>(null);
+  const [isInitialized, setIsInitialized] = useState(false);
   const observerTarget = useRef<HTMLDivElement>(null);
+
+  // 초기 데이터로 전역 상태 초기화 (한 번만)
+  useEffect(() => {
+    if (!isInitialized && initialPosts?.data) {
+      setPosts(initialPosts.data as PostItem[]);
+      setIsInitialized(true);
+    }
+  }, [initialPosts, isInitialized, setPosts]);
 
   // 게시물 로드 함수
   const loadPosts = useCallback(async () => {
@@ -63,7 +71,13 @@ export function PostFeed({ initialPosts, userId }: PostFeedProps) {
 
       const data: PostsResponse = await response.json();
 
-      setPosts((prev) => [...prev, ...data.data]);
+      // 전역 상태에 추가 (중복 체크는 atom에서 처리)
+      setPosts((prev) => {
+        const newPosts = data.data as PostItem[];
+        const existingIds = new Set(prev.map((p) => p.post_id));
+        const uniqueNewPosts = newPosts.filter((p) => !existingIds.has(p.post_id));
+        return [...prev, ...uniqueNewPosts];
+      });
       setHasMore(data.hasMore ?? false);
       setOffset((prev) => prev + data.data.length);
     } catch (err) {
@@ -72,7 +86,7 @@ export function PostFeed({ initialPosts, userId }: PostFeedProps) {
     } finally {
       setLoading(false);
     }
-  }, [loading, hasMore, offset, userId]);
+  }, [loading, hasMore, offset, userId, setPosts]);
 
   // Intersection Observer 설정
   useEffect(() => {

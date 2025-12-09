@@ -5,7 +5,7 @@
  * @description 게시물 카드 컴포넌트
  *
  * Instagram 스타일의 게시물 카드를 표시합니다.
- * 헤더, 이미지, 액션 버튼, 좋아요 수, 캡션, 댓글 미리보기를 포함합니다.
+ * 헤더, 이미지, 액션 버튼, 좋아요 수, 캡션, 댓글 미리보기, 댓글 입력을 포함합니다.
  *
  * @dependencies
  * - lucide-react: 아이콘
@@ -14,9 +14,10 @@
  * - next/image: 이미지 최적화
  * - components/post/LikeButton: 좋아요 버튼
  * - components/post/DoubleTapHeart: 더블탭 좋아요
+ * - components/comment/CommentForm: 댓글 입력 폼
  */
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -28,6 +29,7 @@ import {
 import { formatRelativeTime } from "@/lib/utils/formatRelativeTime";
 import { LikeButton, LikeCount } from "@/components/post/LikeButton";
 import { DoubleTapHeart } from "@/components/post/DoubleTapHeart";
+import { CommentForm, type CommentFormRef } from "@/components/comment/CommentForm";
 import type { PostWithStats, CommentWithUser, LikeResponse } from "@/lib/types";
 
 interface PostCardProps {
@@ -41,12 +43,29 @@ export function PostCard({ post }: PostCardProps) {
   const [showFullCaption, setShowFullCaption] = useState(false);
   const [liked, setLiked] = useState(post.isLiked);
   const [likesCount, setLikesCount] = useState(post.likes_count || 0);
+  const [comments, setComments] = useState<CommentWithUser[]>(post.comments || []);
+  const [commentsCount, setCommentsCount] = useState(post.comments_count || 0);
+  const commentFormRef = useRef<CommentFormRef>(null);
 
   // 캡션이 2줄을 초과하는지 확인 (대략적인 계산)
   const captionLines = post.caption
     ? Math.ceil(post.caption.length / 50)
     : 0;
   const shouldTruncate = captionLines > 2;
+
+  // 새 댓글 추가 핸들러
+  const handleCommentAdded = useCallback((newComment: CommentWithUser) => {
+    // 최신 댓글을 맨 앞에 추가하고 최대 2개만 유지
+    setComments((prev) => [newComment, ...prev].slice(0, 2));
+    setCommentsCount((prev) => prev + 1);
+  }, []);
+
+  // 댓글 버튼 클릭 핸들러
+  const handleCommentClick = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    // 댓글 입력창으로 포커스 이동
+    commentFormRef.current?.focus();
+  }, []);
 
   // 좋아요 상태 변경 핸들러
   const handleLikeChange = useCallback((newLiked: boolean, newCount: number) => {
@@ -169,8 +188,8 @@ export function PostCard({ post }: PostCardProps) {
             onLikeChange={handleLikeChange}
           />
           {/* 댓글 버튼 */}
-          <Link
-            href={`/post/${post.post_id}`}
+          <button
+            onClick={handleCommentClick}
             className="hover:opacity-70 transition-opacity"
             aria-label="댓글"
           >
@@ -178,7 +197,7 @@ export function PostCard({ post }: PostCardProps) {
               size={24}
               style={{ color: 'var(--color-instagram-text-primary)' }}
             />
-          </Link>
+          </button>
           {/* 공유 버튼 */}
           <button
             onClick={handleShareClick}
@@ -240,18 +259,18 @@ export function PostCard({ post }: PostCardProps) {
       )}
 
       {/* 댓글 미리보기 */}
-      {post.comments_count > 0 && (
-        <div className="px-4 pb-4">
-          {post.comments_count > 2 && (
+      {commentsCount > 0 && (
+        <div className="px-4 pb-2">
+          {commentsCount > 2 && (
             <Link
               href={`/post/${post.post_id}`}
               className="text-sm mb-2 block hover:opacity-70"
               style={{ color: 'var(--color-instagram-text-secondary)' }}
             >
-              댓글 {post.comments_count}개 모두 보기
+              댓글 {commentsCount}개 모두 보기
             </Link>
           )}
-          {post.comments.slice(0, 2).map((comment) => (
+          {comments.slice(0, 2).map((comment) => (
             <p key={comment.id} className="text-sm mb-1" style={{ color: 'var(--color-instagram-text-primary)' }}>
               <Link
                 href={`/profile/${comment.user_id}`}
@@ -264,6 +283,9 @@ export function PostCard({ post }: PostCardProps) {
           ))}
         </div>
       )}
+
+      {/* 댓글 입력 폼 */}
+      <CommentForm ref={commentFormRef} postId={post.post_id} onCommentAdded={handleCommentAdded} />
     </article>
   );
 }
