@@ -52,6 +52,7 @@ export interface Comment {
   id: string; // UUID
   post_id: string; // UUID (posts.id 참조)
   user_id: string; // UUID (users.id 참조)
+  parent_id: string | null; // UUID (comments.id 참조) - 부모 댓글 ID (NULL이면 루트 댓글)
   content: string;
   created_at: string; // ISO 8601 timestamp
   updated_at: string; // ISO 8601 timestamp
@@ -124,6 +125,15 @@ export interface CommentWithUser extends Comment {
 }
 
 /**
+ * 답글 포함 댓글 타입 (Thread 형식)
+ * 루트 댓글과 그에 대한 답글들을 포함
+ */
+export interface CommentWithReplies extends CommentWithUser {
+  replies: CommentWithUser[];
+  replies_count: number;
+}
+
+/**
  * 사용자 정보를 포함한 좋아요 타입
  */
 export interface LikeWithUser extends Like {
@@ -170,6 +180,17 @@ export interface CommentsResponse {
 }
 
 /**
+ * Thread 형식 댓글 목록 조회 응답 타입
+ */
+export interface ThreadedCommentsResponse {
+  success: boolean;
+  data: CommentWithReplies[];
+  total_count: number; // 전체 댓글 수 (답글 포함)
+  root_count: number; // 루트 댓글 수
+  error?: string;
+}
+
+/**
  * 좋아요 목록 조회 응답 타입
  */
 export interface LikesResponse {
@@ -195,6 +216,7 @@ export interface CreatePostRequest {
 export interface CreateCommentRequest {
   post_id: string;
   content: string;
+  parent_id?: string; // 답글인 경우 부모 댓글 ID
 }
 
 /**

@@ -99,6 +99,8 @@ pnpm lint
   - `lib/supabase/`: Supabase 클라이언트들 (환경별로 분리)
   - `lib/utils.ts`: 공통 유틸리티 (cn 함수 등)
 - `hooks/`: 커스텀 React Hook들
+  - `hooks/use-sync-user.ts`: Clerk → Supabase 사용자 동기화
+  - `hooks/use-media-query.ts`: 반응형 미디어 쿼리 훅
 - `supabase/`: 데이터베이스 마이그레이션 및 설정
   - `supabase/migrations/`: SQL 마이그레이션 파일들
   - `supabase/config.toml`: Supabase 프로젝트 설정
@@ -225,6 +227,63 @@ const searchParams = await props.searchParams;
 - `app/layout.tsx`: RootLayout with ClerkProvider + SyncUserProvider
 - `lib/supabase.ts`: 레거시 Supabase 클라이언트 (사용 지양, 새 파일들 사용)
 - `components.json`: shadcn/ui 설정
+
+## Feature Components
+
+### 게시물 상세 (Phase 7)
+
+게시물 상세 보기는 화면 크기에 따라 다르게 동작합니다:
+
+- **Desktop (768px 이상)**: `PostModal` 컴포넌트로 모달 형식 표시
+  - 좌측 50%: 이미지
+  - 우측 50%: 헤더, 캡션, 댓글 목록, 액션 버튼, 댓글 입력
+  - 닫기 버튼 및 이전/다음 게시물 네비게이션
+  - 키보드 화살표로 이전/다음 이동
+
+- **Mobile (768px 미만)**: `/post/[postId]` 라우트로 전체 페이지 이동
+  - 뒤로가기 버튼
+  - 세로 스크롤 레이아웃
+
+#### 관련 파일들
+
+- `components/post/post-modal.tsx`: Desktop 모달 컴포넌트
+- `components/comment/comment-list.tsx`: Thread 형식 댓글 목록 + 삭제 기능
+- `components/comment/CommentForm.tsx`: 댓글/답글 입력 폼
+- `app/(main)/post/[postId]/page.tsx`: Mobile 전용 상세 페이지
+- `app/(main)/post/[postId]/post-detail-client.tsx`: 상세 페이지 클라이언트 컴포넌트
+- `hooks/use-media-query.ts`: 반응형 분기를 위한 미디어 쿼리 훅
+
+#### 댓글 기능
+
+- **댓글 정렬**: 루트 댓글은 최신순, 답글은 오래된 순
+- **Thread 형식 (1단계 답글)**:
+  - `comments.parent_id` 컬럼으로 부모-자식 관계 표현
+  - 답글에는 답글 불가 (1단계 깊이 제한)
+  - "답글 N개 보기" / "답글 숨기기" 접기/펼치기 토글
+  - 답글은 들여쓰기로 시각적 구분
+- **답글 달기**:
+  - "답글 달기" 버튼 클릭 시 답글 모드 활성화
+  - "@사용자명" 자동 입력
+  - 답글 모드 표시 ("@사용자명님에게 답글 남기는 중")
+  - ESC 키 또는 X 버튼으로 답글 모드 취소
+- **댓글 삭제**:
+  - 본인 댓글에만 삭제 버튼 표시
+  - 삭제 시 AlertDialog로 확인 요청
+  - 루트 댓글 삭제 시 답글도 함께 삭제 (CASCADE)
+  - API: `DELETE /api/comments`
+
+#### 댓글 API
+
+- `GET /api/comments?post_id={postId}`: Thread 형식 댓글 목록 조회
+- `POST /api/comments`: 댓글/답글 작성 (`parent_id` 파라미터로 답글 구분)
+- `DELETE /api/comments`: 댓글 삭제
+
+#### 타입 정의 (`lib/types.ts`)
+
+- `Comment`: 기본 댓글 타입 (`parent_id` 포함)
+- `CommentWithUser`: 사용자 정보 포함 댓글
+- `CommentWithReplies`: 답글 포함 댓글 (Thread 형식)
+- `ThreadedCommentsResponse`: Thread 형식 댓글 목록 API 응답
 
 ## Additional Cursor Rules
 

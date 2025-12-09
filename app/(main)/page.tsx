@@ -67,12 +67,13 @@ async function getInitialPosts(): Promise<PostsResponse | null> {
       (usersData || []).map((user) => [user.id, user])
     );
 
-    // 댓글 조회
+    // 댓글 조회 (루트 댓글만, parent_id가 null인 것)
     const postIds = postsData.map((post) => post.post_id);
     const { data: commentsData } = await supabase
       .from("comments")
-      .select("id, post_id, user_id, content, created_at, updated_at")
+      .select("id, post_id, user_id, parent_id, content, created_at, updated_at")
       .in("post_id", postIds)
+      .is("parent_id", null)
       .order("created_at", { ascending: false });
 
     // 댓글 작성자 정보 조회
@@ -131,6 +132,7 @@ async function getInitialPosts(): Promise<PostsResponse | null> {
         id: comment.id,
         post_id: comment.post_id,
         user_id: comment.user_id,
+        parent_id: comment.parent_id || null,
         content: comment.content,
         created_at: comment.created_at,
         updated_at: comment.updated_at,

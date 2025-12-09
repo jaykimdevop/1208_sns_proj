@@ -6,6 +6,7 @@
  *
  * Instagram 스타일의 게시물 카드를 표시합니다.
  * 헤더, 이미지, 액션 버튼, 좋아요 수, 캡션, 댓글 미리보기, 댓글 입력을 포함합니다.
+ * 이미지 클릭 시 Desktop에서는 PostModal, Mobile에서는 상세 페이지로 이동합니다.
  *
  * @dependencies
  * - lucide-react: 아이콘
@@ -15,11 +16,14 @@
  * - components/post/LikeButton: 좋아요 버튼
  * - components/post/DoubleTapHeart: 더블탭 좋아요
  * - components/comment/CommentForm: 댓글 입력 폼
+ * - components/post/post-modal: 게시물 상세 모달 (Desktop)
+ * - hooks/use-media-query: 미디어 쿼리 훅
  */
 
 import { useState, useCallback, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   MessageCircle,
   Send,
@@ -30,6 +34,8 @@ import { formatRelativeTime } from "@/lib/utils/formatRelativeTime";
 import { LikeButton, LikeCount } from "@/components/post/LikeButton";
 import { DoubleTapHeart } from "@/components/post/DoubleTapHeart";
 import { CommentForm, type CommentFormRef } from "@/components/comment/CommentForm";
+import { PostModal } from "@/components/post/post-modal";
+import { checkMediaQuery } from "@/hooks/use-media-query";
 import type { PostWithStats, CommentWithUser, LikeResponse } from "@/lib/types";
 
 interface PostCardProps {
@@ -40,11 +46,13 @@ interface PostCardProps {
 }
 
 export function PostCard({ post }: PostCardProps) {
+  const router = useRouter();
   const [showFullCaption, setShowFullCaption] = useState(false);
   const [liked, setLiked] = useState(post.isLiked);
   const [likesCount, setLikesCount] = useState(post.likes_count || 0);
   const [comments, setComments] = useState<CommentWithUser[]>(post.comments || []);
   const [commentsCount, setCommentsCount] = useState(post.comments_count || 0);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const commentFormRef = useRef<CommentFormRef>(null);
 
   // 캡션이 2줄을 초과하는지 확인 (대략적인 계산)
@@ -118,7 +126,34 @@ export function PostCard({ post }: PostCardProps) {
     }
   };
 
+  // 게시물 상세 열기 핸들러 (Desktop: 모달, Mobile: 라우트 이동)
+  const handleOpenDetail = useCallback(() => {
+    // 클릭 시점에 미디어 쿼리 확인 (hydration 문제 방지)
+    const isDesktopNow = checkMediaQuery("(min-width: 768px)");
+    if (isDesktopNow) {
+      setIsModalOpen(true);
+    } else {
+      router.push(`/post/${post.post_id}`);
+    }
+  }, [router, post.post_id]);
+
+  // 현재 게시물 데이터 (모달에 전달용)
+  const currentPostData = {
+    ...post,
+    isLiked: liked,
+    likes_count: likesCount,
+    comments_count: commentsCount,
+    comments,
+  };
+
   return (
+    <>
+    {/* PostModal (Desktop 전용) */}
+    <PostModal
+      post={currentPostData}
+      open={isModalOpen}
+      onOpenChange={setIsModalOpen}
+    />
     <article className="bg-white rounded-lg border mb-6" style={{ borderColor: 'var(--color-instagram-border)' }}>
       {/* 헤더 영역 (60px) */}
       <header className="flex items-center justify-between px-4 h-[60px] border-b" style={{ borderColor: 'var(--color-instagram-border)' }}>
@@ -163,9 +198,15 @@ export function PostCard({ post }: PostCardProps) {
         </button>
       </header>
 
-      {/* 이미지 영역 (1:1 정사각형) - 더블탭 좋아요 */}
+      {/* 이미지 영역 (1:1 정사각형) - 더블탭 좋아요, 클릭 시 상세 열기 */}
       <DoubleTapHeart onDoubleTap={handleDoubleTap}>
-        <div className="w-full aspect-square relative bg-gray-100">
+        <div
+          className="w-full aspect-square relative bg-gray-100 cursor-pointer"
+          onClick={handleOpenDetail}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => e.key === "Enter" && handleOpenDetail()}
+        >
           <Image
             src={post.image_url}
             alt={post.caption || "게시물 이미지"}
@@ -262,13 +303,13 @@ export function PostCard({ post }: PostCardProps) {
       {commentsCount > 0 && (
         <div className="px-4 pb-2">
           {commentsCount > 2 && (
-            <Link
-              href={`/post/${post.post_id}`}
-              className="text-sm mb-2 block hover:opacity-70"
+            <button
+              onClick={handleOpenDetail}
+              className="text-sm mb-2 block hover:opacity-70 text-left"
               style={{ color: 'var(--color-instagram-text-secondary)' }}
             >
               댓글 {commentsCount}개 모두 보기
-            </Link>
+            </button>
           )}
           {comments.slice(0, 2).map((comment) => (
             <p key={comment.id} className="text-sm mb-1" style={{ color: 'var(--color-instagram-text-primary)' }}>
@@ -287,5 +328,6 @@ export function PostCard({ post }: PostCardProps) {
       {/* 댓글 입력 폼 */}
       <CommentForm ref={commentFormRef} postId={post.post_id} onCommentAdded={handleCommentAdded} />
     </article>
+    </>
   );
 }

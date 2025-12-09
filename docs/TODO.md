@@ -157,17 +157,33 @@
 
 ## Phase 7. 게시물 상세 모달
 
-- [ ] `components/post/PostModal.tsx`
-  - [ ] Desktop: 모달 형식 (이미지 50% + 댓글 50%)
-  - [ ] Mobile: 전체 페이지로 전환
-  - [ ] 닫기 버튼 (✕)
-  - [ ] 이전/다음 게시물 네비게이션 (Desktop)
-- [ ] PostCard 클릭 시 PostModal 열기
-  - [ ] 게시물 상세 정보 로드
-  - [ ] 댓글 전체 목록 표시
-- [ ] `components/comment/CommentList.tsx`
-  - [ ] 상세 모달: 전체 댓글 + 스크롤
-  - [ ] 삭제 버튼 (본인만 표시)
+- [x] `components/post/PostModal.tsx`
+  - [x] Desktop: 모달 형식 (이미지 50% + 댓글 50%)
+  - [x] Mobile: 전체 페이지로 전환 (`app/(main)/post/[postId]/page.tsx`)
+  - [x] 닫기 버튼 (✕)
+  - [x] 이전/다음 게시물 네비게이션 (Desktop)
+- [x] PostCard 클릭 시 PostModal 열기
+  - [x] 게시물 상세 정보 로드
+  - [x] 댓글 전체 목록 표시
+- [x] `components/comment/CommentList.tsx`
+  - [x] 상세 모달: 전체 댓글 + 스크롤
+  - [x] 삭제 버튼 (본인만 표시)
+  - [x] 삭제 확인 다이얼로그 (AlertDialog)
+- [x] 댓글 최신순 정렬
+  - [x] 루트 댓글: 최신순 (newest first)
+  - [x] 답글: 오래된 순 (oldest first)
+- [x] Thread 형식 댓글 (1단계 답글)
+  - [x] DB 마이그레이션: `comments.parent_id` 컬럼 추가
+  - [x] API: `parent_id` 파라미터 처리, 1단계 깊이 제한 검증
+  - [x] 타입: `CommentWithReplies`, `ThreadedCommentsResponse` 추가
+- [x] 답글 접기/펼치기 UI
+  - [x] "답글 N개 보기" / "답글 숨기기" 토글 버튼
+  - [x] 답글 들여쓰기로 시각적 구분
+- [x] 답글 달기 기능
+  - [x] "답글 달기" 버튼 (루트 댓글에만 표시)
+  - [x] 답글 모드 표시 ("@사용자명님에게 답글 남기는 중")
+  - [x] @멘션 자동 입력
+  - [x] ESC 키 또는 X 버튼으로 답글 모드 취소
 
 ## Phase 8. 프로필 페이지
 

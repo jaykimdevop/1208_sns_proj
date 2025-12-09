@@ -129,8 +129,9 @@ export async function GET(request: NextRequest) {
     const postIds = postsData.map((post: any) => post.post_id);
     const { data: allComments, error: commentsError } = await supabase
       .from("comments")
-      .select("id, post_id, user_id, content, created_at, updated_at")
+      .select("id, post_id, user_id, parent_id, content, created_at, updated_at")
       .in("post_id", postIds)
+      .is("parent_id", null)
       .order("created_at", { ascending: false });
 
     if (commentsError) {
@@ -189,6 +190,7 @@ export async function GET(request: NextRequest) {
           id: comment.id,
           post_id: comment.post_id,
           user_id: comment.user_id,
+          parent_id: comment.parent_id || null,
           content: comment.content,
           created_at: comment.created_at,
           updated_at: comment.updated_at,
