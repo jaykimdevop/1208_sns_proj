@@ -20,6 +20,8 @@
  */
 
 import { useState, useCallback, useRef, forwardRef, useImperativeHandle, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useUser } from "@clerk/nextjs";
 import { Loader2, X } from "lucide-react";
 import type { CommentWithUser, CreateCommentResponse } from "@/lib/types";
 
@@ -40,6 +42,8 @@ export interface CommentFormRef {
 
 export const CommentForm = forwardRef<CommentFormRef, CommentFormProps>(
   ({ postId, onCommentAdded, replyTo, onCancelReply }, ref) => {
+    const router = useRouter();
+    const { isSignedIn } = useUser();
     const [content, setContent] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -93,6 +97,12 @@ export const CommentForm = forwardRef<CommentFormRef, CommentFormProps>(
     }, [onCancelReply]);
 
     const handleSubmit = useCallback(async () => {
+      // 미로그인 시 로그인 페이지로 이동
+      if (!isSignedIn) {
+        router.push("/sign-in");
+        return;
+      }
+
       const trimmedContent = content.trim();
       if (!trimmedContent || isSubmitting) return;
 
@@ -131,7 +141,7 @@ export const CommentForm = forwardRef<CommentFormRef, CommentFormProps>(
       } finally {
         setIsSubmitting(false);
       }
-    }, [content, isSubmitting, postId, activeReplyTo, onCommentAdded, onCancelReply]);
+    }, [content, isSubmitting, postId, activeReplyTo, onCommentAdded, onCancelReply, isSignedIn, router]);
 
     const handleKeyDown = useCallback(
       (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -188,26 +198,41 @@ export const CommentForm = forwardRef<CommentFormRef, CommentFormProps>(
             value={content}
             onChange={(e) => setContent(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder={activeReplyTo ? "답글 달기..." : "댓글 달기..."}
+            onClick={() => {
+              // 미로그인 시 입력창 클릭하면 로그인 페이지로 이동
+              if (!isSignedIn) {
+                router.push("/sign-in");
+              }
+            }}
+            placeholder={
+              isSignedIn
+                ? activeReplyTo
+                  ? "답글 달기..."
+                  : "댓글 달기..."
+                : "로그인하고 댓글을 남겨보세요"
+            }
             disabled={isSubmitting}
-            className="flex-1 text-sm bg-transparent border-none outline-none placeholder:text-gray-400 disabled:opacity-50"
+            readOnly={!isSignedIn}
+            className="flex-1 text-sm bg-transparent border-none outline-none placeholder:text-gray-400 disabled:opacity-50 cursor-pointer"
             style={{ color: "var(--color-instagram-text-primary)" }}
           />
           <button
             type="button"
             onClick={handleSubmit}
-            disabled={!hasContent || isSubmitting}
+            disabled={(!hasContent || isSubmitting) && isSignedIn}
             className="text-sm font-semibold transition-opacity disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
             style={{
-              color: hasContent
+              color: hasContent || !isSignedIn
                 ? "var(--color-instagram-primary)"
                 : "var(--color-instagram-text-secondary)",
             }}
           >
             {isSubmitting ? (
               <Loader2 size={14} className="animate-spin" />
-            ) : (
+            ) : isSignedIn ? (
               "게시"
+            ) : (
+              "로그인"
             )}
           </button>
           {error && (

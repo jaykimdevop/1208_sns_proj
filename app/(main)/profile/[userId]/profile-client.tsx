@@ -6,6 +6,7 @@
  *
  * 프로필 헤더와 게시물 그리드를 렌더링합니다.
  * 무한 스크롤로 추가 게시물을 로드합니다.
+ * 팔로우 상태 변경 시 통계를 실시간으로 업데이트합니다.
  *
  * @dependencies
  * - components/profile/profile-header: 프로필 헤더
@@ -26,21 +27,26 @@ interface ProfileClientProps {
 }
 
 export function ProfileClient({
-  user,
+  user: initialUser,
   isOwnProfile,
   isFollowing: initialIsFollowing,
   initialPosts,
 }: ProfileClientProps) {
+  const [user, setUser] = useState(initialUser);
   const [posts, setPosts] = useState(initialPosts);
   const [isFollowing, setIsFollowing] = useState(initialIsFollowing);
   const [isLoading, setIsLoading] = useState(false);
   const [hasMore, setHasMore] = useState(initialPosts.length >= 12);
   const [offset, setOffset] = useState(initialPosts.length);
 
-  // 팔로우 버튼 클릭 핸들러 (Phase 9에서 구현 예정)
-  const handleFollowClick = useCallback(() => {
-    // TODO: Phase 9에서 팔로우 API 연동
-    console.log("Follow button clicked - to be implemented in Phase 9");
+  // 팔로우 상태 변경 핸들러
+  const handleFollowChange = useCallback((newIsFollowing: boolean) => {
+    setIsFollowing(newIsFollowing);
+    // 팔로워 수 실시간 업데이트
+    setUser((prevUser) => ({
+      ...prevUser,
+      followers_count: prevUser.followers_count + (newIsFollowing ? 1 : -1),
+    }));
   }, []);
 
   // 더 많은 게시물 로드
@@ -79,7 +85,7 @@ export function ProfileClient({
         user={user}
         isOwnProfile={isOwnProfile}
         isFollowing={isFollowing}
-        onFollowClick={handleFollowClick}
+        onFollowChange={handleFollowChange}
       />
 
       {/* 탭 (게시물만 표시, 추후 확장 가능) */}

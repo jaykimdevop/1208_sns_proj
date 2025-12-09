@@ -16,6 +16,8 @@
  */
 
 import { useState, useCallback } from "react";
+import { useRouter } from "next/navigation";
+import { useUser } from "@clerk/nextjs";
 import { Heart } from "lucide-react";
 import type { LikeResponse } from "@/lib/types";
 
@@ -32,12 +34,20 @@ export function LikeButton({
   initialCount,
   onLikeChange,
 }: LikeButtonProps) {
+  const router = useRouter();
+  const { isSignedIn } = useUser();
   const [liked, setLiked] = useState(initialLiked);
   const [count, setCount] = useState(initialCount);
   const [isAnimating, setIsAnimating] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleClick = useCallback(async () => {
+    // 미로그인 시 로그인 페이지로 이동
+    if (!isSignedIn) {
+      router.push("/sign-in");
+      return;
+    }
+
     if (isLoading) return;
 
     // Optimistic UI 업데이트
@@ -82,7 +92,7 @@ export function LikeButton({
     } finally {
       setIsLoading(false);
     }
-  }, [liked, count, postId, isLoading, onLikeChange]);
+  }, [liked, count, postId, isLoading, onLikeChange, isSignedIn, router]);
 
   return (
     <button

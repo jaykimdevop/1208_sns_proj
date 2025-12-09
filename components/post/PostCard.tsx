@@ -24,6 +24,7 @@ import { useState, useCallback, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useUser } from "@clerk/nextjs";
 import {
   MessageCircle,
   Send,
@@ -47,6 +48,7 @@ interface PostCardProps {
 
 export function PostCard({ post }: PostCardProps) {
   const router = useRouter();
+  const { isSignedIn, isLoaded } = useUser();
   const [showFullCaption, setShowFullCaption] = useState(false);
   const [liked, setLiked] = useState(post.isLiked);
   const [likesCount, setLikesCount] = useState(post.likes_count || 0);
@@ -116,7 +118,14 @@ export function PostCard({ post }: PostCardProps) {
   }, [liked, post.post_id]);
 
   // 공유 버튼 클릭 핸들러 (URL 복사)
-  const handleShareClick = async () => {
+  const handleShareClick = useCallback(async () => {
+    // Clerk이 로드되지 않았으면 무시
+    if (!isLoaded) return;
+    // 로그인되지 않았으면 로그인 페이지로 이동
+    if (!isSignedIn) {
+      router.push("/sign-in");
+      return;
+    }
     const url = `${window.location.origin}/post/${post.post_id}`;
     try {
       await navigator.clipboard.writeText(url);
@@ -124,7 +133,19 @@ export function PostCard({ post }: PostCardProps) {
     } catch (error) {
       console.error("Failed to copy URL:", error);
     }
-  };
+  }, [isLoaded, isSignedIn, router, post.post_id]);
+
+  // 북마크 버튼 클릭 핸들러
+  const handleBookmarkClick = useCallback(() => {
+    // Clerk이 로드되지 않았으면 무시
+    if (!isLoaded) return;
+    // 로그인되지 않았으면 로그인 페이지로 이동
+    if (!isSignedIn) {
+      router.push("/sign-in");
+      return;
+    }
+    // TODO: 북마크 기능 구현
+  }, [isLoaded, isSignedIn, router]);
 
   // 게시물 상세 열기 핸들러 (Desktop: 모달, Mobile: 라우트 이동)
   const handleOpenDetail = useCallback(() => {
@@ -253,6 +274,7 @@ export function PostCard({ post }: PostCardProps) {
         </div>
         {/* 북마크 버튼 */}
         <button
+          onClick={handleBookmarkClick}
           className="hover:opacity-70 transition-opacity"
           aria-label="저장"
         >

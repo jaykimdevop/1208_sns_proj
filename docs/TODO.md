@@ -5,7 +5,7 @@
 - [x] `.github/` 디렉토리
 - [ ] `.husky/` 디렉토리
 - [x] `app/` 디렉토리
-  - [x] `favicon.ico` 파일
+  - [x] `icon.svg` 파일 (favicon 대체)
   - [ ] `not-found.tsx` 파일
   - [ ] `robots.ts` 파일
   - [ ] `sitemap.ts` 파일
@@ -213,19 +213,51 @@
 
 ## Phase 9. 팔로우 기능
 
-- [ ] `app/api/follows/route.ts`
-  - [ ] POST: 팔로우 추가
-  - [ ] DELETE: 팔로우 제거
-  - [ ] 인증 검증 (Clerk)
-  - [ ] 자기 자신 팔로우 방지
-- [ ] `components/profile/FollowButton.tsx`
-  - [ ] "팔로우" 버튼 (파란색, 미팔로우 상태)
-  - [ ] "팔로잉" 버튼 (회색, 팔로우 중 상태)
-  - [ ] Hover 시 "언팔로우" (빨간 테두리)
-  - [ ] 클릭 시 즉시 API 호출 및 UI 업데이트
-- [ ] ProfileHeader에 FollowButton 통합
-  - [ ] 팔로우 상태 관리
-  - [ ] 통계 실시간 업데이트
+- [x] `app/api/follows/route.ts`
+  - [x] POST: 팔로우 추가
+  - [x] DELETE: 팔로우 제거
+  - [x] 인증 검증 (Clerk)
+  - [x] 자기 자신 팔로우 방지
+  - [x] 팔로우 대상 사용자 존재 확인
+  - [x] 중복 팔로우 에러 처리
+- [x] `components/profile/follow-button.tsx`
+  - [x] "팔로우" 버튼 (파란색, 미팔로우 상태)
+  - [x] "팔로잉" 버튼 (회색 테두리, 팔로우 중 상태)
+  - [x] Hover 시 "언팔로우" (빨간 테두리, 빨간 텍스트)
+  - [x] 클릭 시 즉시 API 호출 및 UI 업데이트
+  - [x] Optimistic UI 업데이트 (에러 시 롤백)
+  - [x] 로딩 상태 표시 (Loader2 아이콘)
+- [x] ProfileHeader에 FollowButton 통합
+  - [x] 팔로우 상태 관리
+  - [x] 통계 실시간 업데이트 (followers_count 증감)
+- [x] `lib/types.ts`
+  - [x] FollowResponse 타입 추가
+
+## Phase 9.5. 인증 기반 UX 개선
+
+- [x] Clerk 로그인/회원가입 페이지 생성
+  - [x] `app/(auth)/sign-in/[[...sign-in]]/page.tsx`
+  - [x] `app/(auth)/sign-up/[[...sign-up]]/page.tsx`
+  - [x] `app/(auth)/layout.tsx`
+- [x] Sidebar/BottomNav/Header 로그인 버튼 추가
+  - [x] 미로그인 시 "로그인" 버튼 표시
+  - [x] 로그인 시 "만들기", "프로필" 버튼 표시
+  - [x] Header에 로그인 버튼 추가 (모바일)
+- [x] 인증 필요 액션 로그인 유도
+  - [x] `CommentForm`: 미로그인 시 "로그인하고 댓글을 남겨보세요" 표시, 클릭 시 로그인 페이지 이동
+  - [x] `FollowButton`: 미로그인 시 클릭하면 로그인 페이지 이동
+  - [x] `LikeButton`: 미로그인 시 클릭하면 로그인 페이지 이동
+  - [x] "만들기" 버튼: 로그인 사용자에게만 표시
+  - [x] 공유 버튼 (Send): 미로그인 시 클릭하면 로그인 페이지 이동
+  - [x] 북마크 버튼 (Bookmark): 미로그인 시 클릭하면 로그인 페이지 이동
+- [x] 게시물 작성자 프로필 접근
+  - [x] 미로그인 사용자도 타인 프로필 조회 가능
+- [x] 네비게이션 통일
+  - [x] 활동(Heart) 메뉴 제거 (미구현 기능)
+  - [x] 로그아웃 버튼은 프로필 페이지에서만 접근
+  - [x] BottomNav: 홈, 검색, 만들기, 프로필 (로그인) / 홈, 검색, 로그인 (미로그인)
+  - [x] Sidebar: 홈, 검색, 만들기, 프로필 (로그인) / 홈, 검색, 로그인 (미로그인)
+  - [x] Header: 로고 + 프로필 아이콘 (로그인) / 로고 + 로그인 버튼 (미로그인)
 
 ## Phase 10. 게시물 삭제
 

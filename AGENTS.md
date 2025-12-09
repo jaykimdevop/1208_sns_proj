@@ -285,6 +285,70 @@ const searchParams = await props.searchParams;
 - `CommentWithReplies`: 답글 포함 댓글 (Thread 형식)
 - `ThreadedCommentsResponse`: Thread 형식 댓글 목록 API 응답
 
+### 팔로우 기능 (Phase 9)
+
+사용자 간 팔로우/언팔로우 기능을 제공합니다.
+
+#### 관련 파일들
+
+- `app/api/follows/route.ts`: 팔로우 API (POST: 팔로우, DELETE: 언팔로우)
+- `components/profile/follow-button.tsx`: 팔로우 버튼 컴포넌트
+
+#### 팔로우 API
+
+- `POST /api/follows`: 팔로우 추가
+  - Body: `{ following_id: string }`
+  - Clerk 인증 필수
+  - 자기 자신 팔로우 방지
+  - 중복 팔로우 에러 처리
+- `DELETE /api/follows`: 팔로우 제거
+  - Body: `{ following_id: string }`
+  - Clerk 인증 필수
+
+#### FollowButton 컴포넌트
+
+- Props: `userId`, `initialIsFollowing`, `onFollowChange?`
+- UI 상태:
+  - 미팔로우: 파란색 "팔로우" 버튼
+  - 팔로우 중: 회색 테두리 "팔로잉" 버튼
+  - Hover (팔로우 중): 빨간색 테두리 "언팔로우" 텍스트
+- Optimistic UI 업데이트 (에러 시 롤백)
+- 로딩 상태 표시
+
+#### 타입 정의 (`lib/types.ts`)
+
+- `Follow`: 팔로우 관계 타입
+- `FollowRequest`: 팔로우 API 요청 타입
+- `FollowResponse`: 팔로우 API 응답 타입
+
+### 인증 기반 UX (Phase 9.5)
+
+미로그인 사용자를 위한 UX를 개선합니다.
+
+#### 인증 페이지
+
+- `app/(auth)/sign-in/[[...sign-in]]/page.tsx`: Clerk 로그인 페이지
+- `app/(auth)/sign-up/[[...sign-up]]/page.tsx`: Clerk 회원가입 페이지
+- `app/(auth)/layout.tsx`: 인증 페이지 레이아웃 (Sidebar/Header 없음)
+
+#### 로그인 상태에 따른 UI 분기
+
+- **Sidebar/BottomNav/Header**:
+  - 로그인 시: 홈, 검색, 만들기, 프로필, 로그아웃
+  - 미로그인 시: 홈, 검색, 로그인
+- **CommentForm**: 미로그인 시 "로그인하고 댓글을 남겨보세요" 표시, 클릭 시 `/sign-in` 이동
+- **LikeButton/FollowButton**: 미로그인 시 클릭하면 `/sign-in` 이동
+- **게시물 작성자 프로필**: 미로그인 사용자도 접근 가능
+
+#### 구현 컴포넌트
+
+- `components/layout/Sidebar.tsx`: `isSignedIn` 상태에 따라 네비게이션 아이템 동적 생성
+- `components/layout/BottomNav.tsx`: `isSignedIn` 상태에 따라 네비게이션 아이템 동적 생성
+- `components/layout/Header.tsx`: 미로그인 시 로그인 버튼 표시
+- `components/comment/CommentForm.tsx`: `isSignedIn` 체크 후 로그인 유도
+- `components/post/LikeButton.tsx`: `isSignedIn` 체크 후 로그인 유도
+- `components/profile/follow-button.tsx`: `isSignedIn` 체크 후 로그인 유도
+
 ## Additional Cursor Rules
 
 프로젝트에는 다음 Cursor 규칙들이 있습니다:

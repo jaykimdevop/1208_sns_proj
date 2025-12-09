@@ -6,7 +6,7 @@
  *
  * Mobile 전용 헤더:
  * - 높이: 60px
- * - 로고 + 알림/DM/프로필 아이콘
+ * - 로고 + 프로필 아이콘 (로그인 시) 또는 로그인 버튼 (미로그인 시)
  * - Desktop/Tablet에서는 숨김
  *
  * @dependencies
@@ -15,17 +15,17 @@
  */
 
 import Link from "next/link";
-import { Heart, MessageCircle, User } from "lucide-react";
+import { User, LogIn } from "lucide-react";
 import { useUser } from "@clerk/nextjs";
 
 export function Header() {
-  const { user } = useUser();
+  const { user, isSignedIn } = useUser();
 
   const getProfileHref = () => {
     if (user?.id) {
       return `/profile/${user.id}`;
     }
-    return "/profile";
+    return "/sign-in";
   };
 
   return (
@@ -37,30 +37,25 @@ export function Header() {
 
       {/* 아이콘들 */}
       <div className="flex items-center gap-4">
-        <Link
-          href="/activity"
-          className="hover:opacity-70 transition-opacity"
-          style={{ color: 'var(--color-instagram-text-primary)' }}
-          aria-label="활동"
-        >
-          <Heart size={24} />
-        </Link>
-        <Link
-          href="/direct"
-          className="hover:opacity-70 transition-opacity"
-          style={{ color: 'var(--color-instagram-text-primary)' }}
-          aria-label="메시지"
-        >
-          <MessageCircle size={24} />
-        </Link>
-        <Link
-          href={getProfileHref()}
-          className="hover:opacity-70 transition-opacity"
-          style={{ color: 'var(--color-instagram-text-primary)' }}
-          aria-label="프로필"
-        >
-          <User size={24} />
-        </Link>
+        {isSignedIn ? (
+          <Link
+            href={getProfileHref()}
+            className="hover:opacity-70 transition-opacity"
+            style={{ color: 'var(--color-instagram-text-primary)' }}
+            aria-label="프로필"
+          >
+            <User size={24} />
+          </Link>
+        ) : (
+          <Link
+            href="/sign-in"
+            className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-blue-500 text-white text-sm font-semibold hover:bg-blue-600 transition-colors"
+            aria-label="로그인"
+          >
+            <LogIn size={16} />
+            로그인
+          </Link>
+        )}
       </div>
     </header>
   );

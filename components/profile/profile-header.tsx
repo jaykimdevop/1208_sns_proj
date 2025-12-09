@@ -9,27 +9,51 @@
  * - 사용자명
  * - 통계: 게시물 수, 팔로워 수, 팔로잉 수
  * - 팔로우/프로필 편집 버튼
+ * - 로그아웃 버튼 (본인 프로필)
  *
  * @dependencies
+ * - components/ui/button: 버튼 컴포넌트
+ * - components/profile/follow-button: 팔로우 버튼 컴포넌트
+ * - @clerk/nextjs: useClerk 훅
+ * - lucide-react: LogOut 아이콘
  * - lib/types: UserStats
  */
 
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { FollowButton } from "@/components/profile/follow-button";
+import { useClerk } from "@clerk/nextjs";
+import { LogOut } from "lucide-react";
 import type { UserStats } from "@/lib/types";
 
 interface ProfileHeaderProps {
   user: UserStats;
   isOwnProfile: boolean;
   isFollowing: boolean;
-  onFollowClick?: () => void;
+  onFollowChange?: (isFollowing: boolean) => void;
 }
 
 export function ProfileHeader({
   user,
   isOwnProfile,
   isFollowing,
-  onFollowClick,
+  onFollowChange,
 }: ProfileHeaderProps) {
+  const { signOut } = useClerk();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  // 로그아웃 핸들러
+  const handleSignOut = async () => {
+    if (isLoggingOut) return;
+    setIsLoggingOut(true);
+    try {
+      await signOut({ redirectUrl: "/" });
+    } catch (error) {
+      console.error("Sign out error:", error);
+      setIsLoggingOut(false);
+    }
+  };
+
   // 숫자 포맷팅 (1000 -> 1K, 1000000 -> 1M)
   const formatCount = (count: number): string => {
     if (count >= 1000000) {
@@ -73,29 +97,34 @@ export function ProfileHeader({
             {/* 버튼 영역 */}
             <div className="flex gap-2">
               {isOwnProfile ? (
-                // 본인 프로필: 프로필 편집 버튼 (1차에서는 비활성화)
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="font-semibold"
-                  disabled
-                >
-                  프로필 편집
-                </Button>
+                // 본인 프로필: 프로필 편집 버튼 + 로그아웃 버튼
+                <>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="font-semibold"
+                    disabled
+                  >
+                    프로필 편집
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="font-semibold"
+                    onClick={handleSignOut}
+                    disabled={isLoggingOut}
+                  >
+                    <LogOut size={16} className="mr-1" />
+                    {isLoggingOut ? "로그아웃 중..." : "로그아웃"}
+                  </Button>
+                </>
               ) : (
                 // 타인 프로필: 팔로우/팔로잉 버튼
-                <Button
-                  variant={isFollowing ? "outline" : "default"}
-                  size="sm"
-                  className={`font-semibold min-w-[100px] ${
-                    isFollowing
-                      ? "hover:bg-red-50 hover:text-red-500 hover:border-red-500"
-                      : ""
-                  }`}
-                  onClick={onFollowClick}
-                >
-                  {isFollowing ? "팔로잉" : "팔로우"}
-                </Button>
+                <FollowButton
+                  userId={user.user_id}
+                  initialIsFollowing={isFollowing}
+                  onFollowChange={onFollowChange}
+                />
               )}
             </div>
           </div>

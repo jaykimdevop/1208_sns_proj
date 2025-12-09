@@ -17,7 +17,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Home, Search, PlusSquare, User } from "lucide-react";
+import { Home, Search, PlusSquare, User, LogIn } from "lucide-react";
 import { useUser } from "@clerk/nextjs";
 import { CreatePostModal } from "@/components/post/CreatePostModal";
 
@@ -28,26 +28,35 @@ interface NavItem {
   isButton?: boolean; // 버튼으로 렌더링할지 여부
 }
 
-const navItems: NavItem[] = [
+// 기본 네비게이션 (로그인 여부와 무관)
+const baseNavItems: NavItem[] = [
   { href: "/", icon: Home, label: "홈" },
   { href: "/search", icon: Search, label: "검색" },
-  { href: "/create", icon: PlusSquare, label: "만들기", isButton: true },
-  { href: "/profile", icon: User, label: "프로필" },
 ];
 
 export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
-  const { user } = useUser();
+  const { user, isSignedIn } = useUser();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
-  // 프로필 링크는 사용자 ID가 있을 때 동적으로 생성
-  const getProfileHref = () => {
-    if (user?.id) {
-      return `/profile/${user.id}`;
+  // 로그인 상태에 따라 네비게이션 아이템 동적 생성
+  const getNavItems = (): NavItem[] => {
+    if (isSignedIn && user?.id) {
+      return [
+        ...baseNavItems,
+        { href: "/create", icon: PlusSquare, label: "만들기", isButton: true },
+        { href: `/profile/${user.id}`, icon: User, label: "프로필" },
+      ];
     }
-    return "/profile";
+    // 미로그인 시 로그인 버튼 표시
+    return [
+      ...baseNavItems,
+      { href: "/sign-in", icon: LogIn, label: "로그인" },
+    ];
   };
+
+  const navItems = getNavItems();
 
   // 게시물 생성 후 콜백
   const handlePostCreated = () => {
@@ -62,7 +71,7 @@ export function Sidebar() {
   // 네비게이션 아이템 렌더링 (Desktop)
   const renderDesktopNavItem = (item: NavItem) => {
     const Icon = item.icon;
-    const href = item.href === "/profile" ? getProfileHref() : item.href;
+    const href = item.href;
     const isActive =
       item.href === "/"
         ? pathname === "/"
@@ -105,7 +114,7 @@ export function Sidebar() {
   // 네비게이션 아이템 렌더링 (Tablet)
   const renderTabletNavItem = (item: NavItem) => {
     const Icon = item.icon;
-    const href = item.href === "/profile" ? getProfileHref() : item.href;
+    const href = item.href;
     const isActive =
       item.href === "/"
         ? pathname === "/"

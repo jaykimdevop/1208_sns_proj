@@ -281,6 +281,15 @@ export interface DeleteCommentResponse {
   error?: string;
 }
 
+/**
+ * 팔로우 API 응답 타입
+ */
+export interface FollowResponse {
+  success: boolean;
+  isFollowing: boolean;
+  error?: string;
+}
+
 // ============================================
 // 페이지네이션 타입
 // ============================================
