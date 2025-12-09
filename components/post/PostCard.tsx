@@ -20,7 +20,7 @@
  * - hooks/use-media-query: 미디어 쿼리 훅
  */
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, memo, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -57,6 +57,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { handleApiError, handleFetchError, getUserFriendlyMessage } from "@/lib/utils/error-handler";
 import type { PostWithStats, CommentWithUser, LikeResponse, BookmarkResponse, DeletePostResponse } from "@/lib/types";
 
 interface PostCardProps {
@@ -68,7 +69,7 @@ interface PostCardProps {
   onPostDeleted?: (postId: string) => void;
 }
 
-export function PostCard({ post, onPostDeleted }: PostCardProps) {
+function PostCardComponent({ post, onPostDeleted }: PostCardProps) {
   const router = useRouter();
   const { isSignedIn, isLoaded, user } = useUser();
   const [showFullCaption, setShowFullCaption] = useState(false);
@@ -86,11 +87,12 @@ export function PostCard({ post, onPostDeleted }: PostCardProps) {
   // 본인 게시물인지 확인
   const isOwnPost = user?.id === post.user?.clerk_id;
 
-  // 캡션이 2줄을 초과하는지 확인 (대략적인 계산)
-  const captionLines = post.caption
-    ? Math.ceil(post.caption.length / 50)
-    : 0;
-  const shouldTruncate = captionLines > 2;
+  // 캡션이 2줄을 초과하는지 확인 (대략적인 계산) - useMemo로 메모이제이션
+  const shouldTruncate = useMemo(() => {
+    if (!post.caption) return false;
+    const captionLines = Math.ceil(post.caption.length / 50);
+    return captionLines > 2;
+  }, [post.caption]);
 
   // 새 댓글 추가 핸들러
   const handleCommentAdded = useCallback((newComment: CommentWithUser) => {
@@ -130,19 +132,28 @@ export function PostCard({ post, onPostDeleted }: PostCardProps) {
         body: JSON.stringify({ post_id: post.post_id }),
       });
 
+      if (!response.ok) {
+        const apiError = await handleApiError(response, "handleDoubleTap");
+        setLiked(false);
+        setLikesCount((prev) => prev - 1);
+        toast.error(getUserFriendlyMessage(apiError, "좋아요"));
+        return;
+      }
+
       const data: LikeResponse = await response.json();
 
       if (!data.success) {
         // API 실패 시 롤백
         setLiked(false);
         setLikesCount((prev) => prev - 1);
-        console.error("Like API error:", data.error);
+        toast.error(data.error || "좋아요 처리에 실패했습니다");
       }
     } catch (error) {
       // 네트워크 에러 시 롤백
+      const apiError = handleFetchError(error, "handleDoubleTap");
       setLiked(false);
       setLikesCount((prev) => prev - 1);
-      console.error("Like request failed:", error);
+      toast.error(getUserFriendlyMessage(apiError, "좋아요"));
     }
   }, [liked, post.post_id]);
 
@@ -160,8 +171,8 @@ export function PostCard({ post, onPostDeleted }: PostCardProps) {
       await navigator.clipboard.writeText(url);
       toast.success("링크가 복사되었습니다");
     } catch (error) {
-      console.error("Failed to copy URL:", error);
-      toast.error("링크 복사에 실패했습니다");
+      const apiError = handleFetchError(error, "handleShareClick");
+      toast.error(getUserFriendlyMessage(apiError, "공유"));
     }
   }, [isLoaded, isSignedIn, router, post.post_id]);
 
@@ -191,6 +202,13 @@ export function PostCard({ post, onPostDeleted }: PostCardProps) {
         body: JSON.stringify({ post_id: post.post_id }),
       });
 
+      if (!response.ok) {
+        const apiError = await handleApiError(response, "handleBookmarkClick");
+        setBookmarked(prevBookmarked);
+        toast.error(getUserFriendlyMessage(apiError, "북마크"));
+        return;
+      }
+
       const data: BookmarkResponse = await response.json();
 
       if (!data.success) {
@@ -202,9 +220,9 @@ export function PostCard({ post, onPostDeleted }: PostCardProps) {
       }
     } catch (error) {
       // 네트워크 에러 시 롤백
+      const apiError = handleFetchError(error, "handleBookmarkClick");
       setBookmarked(prevBookmarked);
-      toast.error("북마크 처리에 실패했습니다");
-      console.error("Bookmark request failed:", error);
+      toast.error(getUserFriendlyMessage(apiError, "북마크"));
     } finally {
       setIsBookmarkLoading(false);
     }
@@ -231,6 +249,12 @@ export function PostCard({ post, onPostDeleted }: PostCardProps) {
         method: "DELETE",
       });
 
+      if (!response.ok) {
+        const apiError = await handleApiError(response, "handleDeletePost");
+        toast.error(getUserFriendlyMessage(apiError, "게시물 삭제"));
+        return;
+      }
+
       const data: DeletePostResponse = await response.json();
 
       if (data.success) {
@@ -244,8 +268,8 @@ export function PostCard({ post, onPostDeleted }: PostCardProps) {
         toast.error(data.error || "게시물 삭제에 실패했습니다");
       }
     } catch (error) {
-      console.error("게시물 삭제 실패:", error);
-      toast.error("게시물 삭제에 실패했습니다");
+      const apiError = handleFetchError(error, "handleDeletePost");
+      toast.error(getUserFriendlyMessage(apiError, "게시물 삭제"));
     } finally {
       setIsDeleting(false);
     }
@@ -381,7 +405,13 @@ export function PostCard({ post, onPostDeleted }: PostCardProps) {
             fill
             className="object-cover"
             sizes="(max-width: 768px) 100vw, 630px"
-            unoptimized={post.image_url.startsWith("http")} // 외부 URL인 경우 unoptimized
+            loading="lazy"
+            onError={(e) => {
+              // 이미지 로드 실패 시 fallback 처리
+              const target = e.target as HTMLImageElement;
+              target.style.display = "none";
+              // TODO: 기본 이미지 fallback 추가
+            }}
           />
         </div>
       </DoubleTapHeart>
@@ -509,3 +539,17 @@ export function PostCard({ post, onPostDeleted }: PostCardProps) {
     </>
   );
 }
+
+// React.memo로 메모이제이션 (props 비교 함수 제공)
+export const PostCard = memo(PostCardComponent, (prevProps, nextProps) => {
+  // post 객체의 주요 속성만 비교
+  return (
+    prevProps.post.post_id === nextProps.post.post_id &&
+    prevProps.post.likes_count === nextProps.post.likes_count &&
+    prevProps.post.comments_count === nextProps.post.comments_count &&
+    prevProps.post.isLiked === nextProps.post.isLiked &&
+    prevProps.post.isBookmarked === nextProps.post.isBookmarked &&
+    prevProps.post.comments.length === nextProps.post.comments.length &&
+    prevProps.onPostDeleted === nextProps.onPostDeleted
+  );
+});

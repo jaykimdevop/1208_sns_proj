@@ -15,10 +15,12 @@
  * - lib/types: LikeResponse
  */
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, memo } from "react";
 import { useRouter } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
 import { Heart } from "lucide-react";
+import { handleApiError, handleFetchError, getUserFriendlyMessage } from "@/lib/utils/error-handler";
+import { toast } from "sonner";
 import type { LikeResponse } from "@/lib/types";
 
 interface LikeButtonProps {
@@ -28,7 +30,7 @@ interface LikeButtonProps {
   onLikeChange?: (liked: boolean, count: number) => void;
 }
 
-export function LikeButton({
+function LikeButtonComponent({
   postId,
   initialLiked,
   initialCount,
@@ -73,22 +75,31 @@ export function LikeButton({
         body: JSON.stringify({ post_id: postId }),
       });
 
+      if (!response.ok) {
+        const apiError = await handleApiError(response, "handleClick");
+        setLiked(previousLiked);
+        setCount(previousCount);
+        toast.error(getUserFriendlyMessage(apiError, "좋아요"));
+        return;
+      }
+
       const data: LikeResponse = await response.json();
 
       if (!data.success) {
         // API 실패 시 롤백
         setLiked(previousLiked);
         setCount(previousCount);
-        console.error("Like API error:", data.error);
+        toast.error(data.error || "좋아요 처리에 실패했습니다");
       } else {
         // 성공 시 콜백 호출
         onLikeChange?.(newLiked, newCount);
       }
     } catch (error) {
       // 네트워크 에러 시 롤백
+      const apiError = handleFetchError(error, "handleClick");
       setLiked(previousLiked);
       setCount(previousCount);
-      console.error("Like request failed:", error);
+      toast.error(getUserFriendlyMessage(apiError, "좋아요"));
     } finally {
       setIsLoading(false);
     }
@@ -113,6 +124,16 @@ export function LikeButton({
     </button>
   );
 }
+
+// React.memo로 메모이제이션
+export const LikeButton = memo(LikeButtonComponent, (prevProps, nextProps) => {
+  return (
+    prevProps.postId === nextProps.postId &&
+    prevProps.initialLiked === nextProps.initialLiked &&
+    prevProps.initialCount === nextProps.initialCount &&
+    prevProps.onLikeChange === nextProps.onLikeChange
+  );
+});
 
 /**
  * 좋아요 수 표시 컴포넌트

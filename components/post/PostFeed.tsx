@@ -21,6 +21,7 @@ import { useAtom } from "jotai";
 import { PostCard } from "./PostCard";
 import { PostCardSkeleton } from "./PostCardSkeleton";
 import { postsAtom, type PostItem } from "@/states/posts-atom";
+import { handleApiError, handleFetchError, getUserFriendlyMessage } from "@/lib/utils/error-handler";
 import type { PostsResponse } from "@/lib/types";
 
 interface PostFeedProps {
@@ -54,9 +55,21 @@ export function PostFeed({ initialPosts, userId }: PostFeedProps) {
     }
   }, [initialPosts, isInitialized, setPosts]);
 
+  // AbortController ref (요청 취소용)
+  const abortControllerRef = useRef<AbortController | null>(null);
+
   // 게시물 로드 함수
   const loadPosts = useCallback(async () => {
     if (loading || !hasMore) return;
+
+    // 이전 요청 취소
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+
+    // 새로운 AbortController 생성
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
 
     setLoading(true);
     setError(null);
@@ -71,10 +84,19 @@ export function PostFeed({ initialPosts, userId }: PostFeedProps) {
         params.append("userId", userId);
       }
 
-      const response = await fetch(`/api/posts?${params.toString()}`);
+      // 타임아웃 설정 (10초)
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+      const response = await fetch(`/api/posts?${params.toString()}`, {
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeoutId);
 
       if (!response.ok) {
-        throw new Error("Failed to fetch posts");
+        const apiError = await handleApiError(response, "loadPosts");
+        setError(getUserFriendlyMessage(apiError, "게시물 로드"));
+        return;
       }
 
       const data: PostsResponse = await response.json();
@@ -89,12 +111,25 @@ export function PostFeed({ initialPosts, userId }: PostFeedProps) {
       setHasMore(data.hasMore ?? false);
       setOffset((prev) => prev + data.data.length);
     } catch (err) {
-      console.error("Error loading posts:", err);
-      setError("게시물을 불러오는 중 오류가 발생했습니다.");
+      // AbortError는 무시 (의도적인 취소)
+      if (err instanceof Error && err.name === "AbortError") {
+        return;
+      }
+      const apiError = handleFetchError(err, "loadPosts");
+      setError(getUserFriendlyMessage(apiError, "게시물 로드"));
     } finally {
       setLoading(false);
     }
   }, [loading, hasMore, offset, userId, setPosts]);
+
+  // 컴포넌트 언마운트 시 요청 취소
+  useEffect(() => {
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
+  }, []);
 
   // Intersection Observer 설정
   useEffect(() => {

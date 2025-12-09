@@ -206,7 +206,13 @@ export function PostDetailClient({ post }: PostDetailClientProps) {
             fill
             className="object-cover"
             sizes="100vw"
-            unoptimized={post.image_url.startsWith("http")}
+            priority
+            onError={(e) => {
+              // 이미지 로드 실패 시 fallback 처리
+              const target = e.target as HTMLImageElement;
+              target.style.display = "none";
+              // TODO: 기본 이미지 fallback 추가
+            }}
           />
         </div>
       </DoubleTapHeart>

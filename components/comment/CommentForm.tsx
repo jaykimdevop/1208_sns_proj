@@ -19,10 +19,12 @@
  * - lib/types: CommentWithUser, CreateCommentResponse
  */
 
-import { useState, useCallback, useRef, forwardRef, useImperativeHandle, useEffect } from "react";
+import { useState, useCallback, useRef, forwardRef, useImperativeHandle, useEffect, memo } from "react";
 import { useRouter } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
 import { Loader2, X } from "lucide-react";
+import { handleApiError, handleFetchError, getUserFriendlyMessage } from "@/lib/utils/error-handler";
+import { toast } from "sonner";
 import type { CommentWithUser, CreateCommentResponse } from "@/lib/types";
 
 interface CommentFormProps {
@@ -122,10 +124,21 @@ export const CommentForm = forwardRef<CommentFormRef, CommentFormProps>(
           }),
         });
 
+        if (!response.ok) {
+          const apiError = await handleApiError(response, "handleSubmit");
+          const errorMessage = getUserFriendlyMessage(apiError, "댓글 작성");
+          setError(errorMessage);
+          toast.error(errorMessage);
+          return;
+        }
+
         const data: CreateCommentResponse = await response.json();
 
-        if (!response.ok || !data.success) {
-          throw new Error(data.error || "댓글 작성에 실패했습니다.");
+        if (!data.success) {
+          const errorMessage = data.error || "댓글 작성에 실패했습니다.";
+          setError(errorMessage);
+          toast.error(errorMessage);
+          return;
         }
 
         if (data.comment) {
@@ -136,8 +149,10 @@ export const CommentForm = forwardRef<CommentFormRef, CommentFormProps>(
           inputRef.current?.focus();
         }
       } catch (err) {
-        console.error("Error creating comment:", err);
-        setError(err instanceof Error ? err.message : "댓글 작성에 실패했습니다.");
+        const apiError = handleFetchError(err, "handleSubmit");
+        const errorMessage = getUserFriendlyMessage(apiError, "댓글 작성");
+        setError(errorMessage);
+        toast.error(errorMessage);
       } finally {
         setIsSubmitting(false);
       }

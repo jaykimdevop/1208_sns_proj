@@ -25,6 +25,7 @@ import {
 import { UserSearchResult } from "./user-search-result";
 import { PostSearchResult } from "./post-search-result";
 import { PostModal } from "@/components/post/post-modal";
+import { handleApiError, handleFetchError } from "@/lib/utils/error-handler";
 import type { SearchResponse, SearchUserResult, SearchPostResult } from "@/lib/types";
 
 // ============================================
@@ -93,6 +94,9 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
     }
   }, [open]);
 
+  // AbortController ref (요청 취소용)
+  const abortControllerRef = useRef<AbortController | null>(null);
+
   // 검색 함수
   const performSearch = useCallback(
     async (searchQuery: string, type: SearchTab, offset: number = 0) => {
@@ -105,6 +109,15 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
         setHasMorePosts(false);
         return;
       }
+
+      // 이전 요청 취소
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+
+      // 새로운 AbortController 생성
+      const controller = new AbortController();
+      abortControllerRef.current = controller;
 
       const isInitialSearch = offset === 0;
       if (isInitialSearch) {
@@ -121,7 +134,27 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
           offset: offset.toString(),
         });
 
-        const response = await fetch(`/api/search?${params}`);
+        // 타임아웃 설정 (10초)
+        const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+        const response = await fetch(`/api/search?${params}`, {
+          signal: controller.signal,
+        });
+
+        clearTimeout(timeoutId);
+
+        if (!response.ok) {
+          const apiError = await handleApiError(response, "performSearch");
+          // 검색 에러는 조용히 처리 (사용자에게는 빈 결과 표시)
+          if (isInitialSearch) {
+            setUsers([]);
+            setPosts([]);
+            setUsersCount(0);
+            setPostsCount(0);
+          }
+          return;
+        }
+
         const data: SearchResponse = await response.json();
 
         if (data.success) {
@@ -148,9 +181,28 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
             setPostsCount(data.posts_count);
             setHasMorePosts(offset + RESULTS_PER_PAGE < data.posts_count);
           }
+        } else if (data.error) {
+          // 검색 실패 시 빈 결과 표시
+          if (isInitialSearch) {
+            setUsers([]);
+            setPosts([]);
+            setUsersCount(0);
+            setPostsCount(0);
+          }
         }
       } catch (error) {
-        console.error("Search error:", error);
+        // AbortError는 무시 (의도적인 취소)
+        if (error instanceof Error && error.name === "AbortError") {
+          return;
+        }
+        const apiError = handleFetchError(error, "performSearch");
+        // 검색 에러는 조용히 처리 (사용자에게는 빈 결과 표시)
+        if (isInitialSearch) {
+          setUsers([]);
+          setPosts([]);
+          setUsersCount(0);
+          setPostsCount(0);
+        }
       } finally {
         setIsLoading(false);
         setIsLoadingMore(false);
@@ -158,6 +210,24 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
     },
     []
   );
+
+  // 컴포넌트 언마운트 시 요청 취소
+  useEffect(() => {
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
+  }, []);
+
+  // 컴포넌트 언마운트 시 요청 취소
+  useEffect(() => {
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
+  }, []);
 
   // 디바운스된 검색
   useEffect(() => {

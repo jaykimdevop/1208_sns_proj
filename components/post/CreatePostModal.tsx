@@ -30,6 +30,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { postsAtom, type PostItem } from "@/states/posts-atom";
+import { handleApiError, handleFetchError, getUserFriendlyMessage } from "@/lib/utils/error-handler";
 import type { CreatePostResponse, PostsResponse } from "@/lib/types";
 
 // ============================================
@@ -208,9 +209,14 @@ export function CreatePostModal({
         body: formData,
       });
 
+      if (!response.ok) {
+        const apiError = await handleApiError(response, "handleSubmit");
+        throw new Error(getUserFriendlyMessage(apiError, "게시물 업로드"));
+      }
+
       const data: CreatePostResponse = await response.json();
 
-      if (!response.ok || !data.success) {
+      if (!data.success) {
         throw new Error(data.error || "게시물 업로드에 실패했습니다.");
       }
 
@@ -261,10 +267,11 @@ export function CreatePostModal({
       onOpenChange(false);
       onPostCreated?.();
     } catch (err) {
-      console.error("Error creating post:", err);
-      setError(
-        err instanceof Error ? err.message : "게시물 업로드에 실패했습니다."
-      );
+      const errorMessage =
+        err instanceof Error
+          ? err.message
+          : handleFetchError(err, "handleSubmit").message;
+      setError(errorMessage || "게시물 업로드에 실패했습니다.");
     } finally {
       setIsUploading(false);
     }

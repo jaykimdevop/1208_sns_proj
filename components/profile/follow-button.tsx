@@ -19,6 +19,8 @@ import { useRouter } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
+import { handleApiError, handleFetchError, getUserFriendlyMessage } from "@/lib/utils/error-handler";
+import { toast } from "sonner";
 import type { FollowResponse } from "@/lib/types";
 
 interface FollowButtonProps {
@@ -65,12 +67,19 @@ export function FollowButton({
         body: JSON.stringify({ following_id: userId }),
       });
 
+      if (!response.ok) {
+        const apiError = await handleApiError(response, "handleClick");
+        setIsFollowing(previousState);
+        toast.error(getUserFriendlyMessage(apiError, "팔로우"));
+        return;
+      }
+
       const data: FollowResponse = await response.json();
 
-      if (!response.ok || !data.success) {
+      if (!data.success) {
         // 에러 시 롤백
         setIsFollowing(previousState);
-        console.error("Follow error:", data.error);
+        toast.error(data.error || "팔로우 처리에 실패했습니다");
         return;
       }
 
@@ -78,8 +87,9 @@ export function FollowButton({
       onFollowChange?.(data.isFollowing);
     } catch (error) {
       // 네트워크 에러 시 롤백
+      const apiError = handleFetchError(error, "handleClick");
       setIsFollowing(previousState);
-      console.error("Follow request failed:", error);
+      toast.error(getUserFriendlyMessage(apiError, "팔로우"));
     } finally {
       setIsLoading(false);
     }

@@ -18,7 +18,7 @@
  * - lib/types: PostWithStats, CommentWithUser
  */
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, memo } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Heart, MessageCircle, Grid3X3 } from "lucide-react";
@@ -39,7 +39,7 @@ interface PostGridProps {
   emptyMessage?: string;
 }
 
-export function PostGrid({
+function PostGridComponent({
   posts,
   onLoadMore,
   hasMore = false,
@@ -142,7 +142,13 @@ export function PostGrid({
               fill
               sizes="(max-width: 768px) 33vw, 300px"
               className="object-cover"
-              unoptimized={post.image_url.startsWith("http")}
+              loading="lazy"
+              onError={(e) => {
+                // 이미지 로드 실패 시 fallback 처리
+                const target = e.target as HTMLImageElement;
+                target.style.display = "none";
+                // TODO: 기본 이미지 fallback 추가
+              }}
             />
 
             {/* Hover 오버레이 */}
@@ -194,4 +200,15 @@ export function PostGrid({
     </>
   );
 }
+
+// React.memo로 메모이제이션
+export const PostGrid = memo(PostGridComponent, (prevProps, nextProps) => {
+  return (
+    prevProps.posts.length === nextProps.posts.length &&
+    prevProps.posts.every((p, i) => p.post_id === nextProps.posts[i]?.post_id) &&
+    prevProps.hasMore === nextProps.hasMore &&
+    prevProps.isLoading === nextProps.isLoading &&
+    prevProps.onLoadMore === nextProps.onLoadMore
+  );
+});
 
