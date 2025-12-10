@@ -1,11 +1,11 @@
 - [x] `.cursor/` 디렉토리
   - [x] `rules/` 커서룰
   - [ ] `mcp.json` MCP 서버 설정
-  - [ ] `dir.md` 프로젝트 디렉토리 구조
+  - [x] `dir.md` 프로젝트 디렉토리 구조 (`docs/DIR.md`)
 - [x] `.github/` 디렉토리
 - [ ] `.husky/` 디렉토리
 - [x] `app/` 디렉토리
-  - [x] `icon.svg` 파일 (favicon 대체)
+  - [x] `icon.tsx` 파일 (favicon 대체, Next.js 15 App Router)
   - [ ] `not-found.tsx` 파일
   - [ ] `robots.ts` 파일
   - [ ] `sitemap.ts` 파일
@@ -488,6 +488,12 @@
     - [x] 서버 사이드 키 노출 확인 방법 문서화
     - [x] RLS 정책 활성화 확인 가이드
     - [x] API 보안 확인 체크리스트
+    - [x] RLS 정책 마이그레이션 파일 생성
+      - [x] `supabase/migrations/20250115000000_enable_rls_policies.sql` 생성
+      - [x] 모든 테이블에 RLS 활성화 및 정책 설정
+      - [x] 기존 정책 충돌 방지 (DROP POLICY IF EXISTS 사용)
+      - [x] Users, Posts, Likes, Comments, Follows, Bookmarks 테이블 정책 설정
+      - [x] Clerk 인증 기반 정책 구현 (auth.jwt()->>'sub' 사용)
   - [x] Vercel 배포 설정
     - [x] Vercel 배포 가이드 문서 생성 (`docs/VERCEL_DEPLOYMENT.md`)
     - [x] 빌드 설정 확인 (`package.json`, `next.config.ts`)
