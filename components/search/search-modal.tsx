@@ -24,13 +24,6 @@ import {
 } from "@/components/ui/dialog";
 import { UserSearchResult } from "./user-search-result";
 import { PostSearchResult } from "./post-search-result";
-import dynamic from "next/dynamic";
-
-// 코드 스플리팅: PostModal을 동적 import
-const PostModal = dynamic(
-  () => import("@/components/post/post-modal").then((mod) => ({ default: mod.PostModal })),
-  { ssr: false }
-);
 import { handleApiError, handleFetchError } from "@/lib/utils/error-handler";
 import type { SearchResponse, SearchUserResult, SearchPostResult } from "@/lib/types";
 
@@ -71,9 +64,6 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
   const [hasMorePosts, setHasMorePosts] = useState(false);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
 
-  // 게시물 모달 상태
-  const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
-  const [postIds, setPostIds] = useState<string[]>([]);
 
   // refs
   const inputRef = useRef<HTMLInputElement>(null);
@@ -178,11 +168,9 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
             if (isInitialSearch) {
               setPosts(data.posts);
               setPostsOffset(RESULTS_PER_PAGE);
-              setPostIds(data.posts.map((p) => p.post_id));
             } else {
               setPosts((prev) => [...prev, ...data.posts]);
               setPostsOffset((prev) => prev + RESULTS_PER_PAGE);
-              setPostIds((prev) => [...prev, ...data.posts.map((p) => p.post_id)]);
             }
             setPostsCount(data.posts_count);
             setHasMorePosts(offset + RESULTS_PER_PAGE < data.posts_count);
@@ -282,9 +270,10 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
     }
   }, [handleLoadMore]);
 
-  // 게시물 모달 열기
-  const handleOpenPostModal = (postId: string) => {
-    setSelectedPostId(postId);
+  // 게시물 클릭 핸들러 (PostSearchResult에서 처리하므로 여기서는 모달만 닫기)
+  const handleOpenPostModal = () => {
+    // PostSearchResult에서 이미 페이지 이동을 처리하므로 여기서는 모달만 닫기
+    onOpenChange(false);
   };
 
   // 모달에서 선택 시 검색 모달 닫기
@@ -490,15 +479,6 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
         </DialogContent>
       </Dialog>
 
-      {/* 게시물 상세 모달 */}
-      {selectedPostId && (
-        <PostModal
-          postId={selectedPostId}
-          postIds={postIds}
-          onClose={() => setSelectedPostId(null)}
-          onNavigate={setSelectedPostId}
-        />
-      )}
     </>
   );
 }

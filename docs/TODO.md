@@ -477,14 +477,37 @@
 
 ## Phase 16. 배포
 
-- [ ] 배포 준비
-  - [ ] 환경 변수 설정
-    - [ ] 프로덕션 환경 변수 확인
-    - [ ] 보안 설정 검토
-  - [ ] Vercel 배포 설정
-    - [ ] 빌드 설정 확인
-    - [ ] 도메인 설정
-  - [ ] 프로덕션 빌드 테스트
-    - [ ] 빌드 성공 확인
-    - [ ] 런타임 에러 확인
-    - [ ] 성능 최적화 확인
+- [x] 배포 준비
+  - [x] 환경 변수 설정
+    - [x] `.env.example` 파일 생성 (환경 변수 템플릿)
+    - [x] 환경 변수 검증 스크립트 생성 (`scripts/verify-env.ts`)
+    - [x] `package.json`에 `verify:env` 스크립트 추가
+    - [x] 프로덕션 환경 변수 확인 가이드 작성
+  - [x] 보안 설정 검토
+    - [x] 보안 검토 가이드 문서 생성 (`docs/SECURITY_REVIEW.md`)
+    - [x] 서버 사이드 키 노출 확인 방법 문서화
+    - [x] RLS 정책 활성화 확인 가이드
+    - [x] API 보안 확인 체크리스트
+  - [x] Vercel 배포 설정
+    - [x] Vercel 배포 가이드 문서 생성 (`docs/VERCEL_DEPLOYMENT.md`)
+    - [x] 빌드 설정 확인 (`package.json`, `next.config.ts`)
+    - [x] 환경 변수 설정 가이드 작성
+    - [x] 도메인 설정 가이드 작성 (선택사항)
+  - [x] 프로덕션 빌드 테스트
+    - [x] 로컬 프로덕션 빌드 테스트 (`pnpm build` 성공 확인)
+    - [x] 빌드 에러 수정 (search-modal.tsx PostModal props 수정)
+    - [x] 빌드 결과 분석 (번들 크기, 라우트별 크기)
+  - [x] 런타임 에러 확인
+    - [x] 배포 체크리스트 문서 생성 (`docs/DEPLOYMENT_CHECKLIST.md`)
+    - [x] 기능별 테스트 체크리스트 작성
+    - [x] 반응형 테스트 체크리스트 작성
+  - [x] 성능 최적화 확인
+    - [x] 성능 최적화 가이드 문서 생성 (`docs/PERFORMANCE_OPTIMIZATION.md`)
+    - [x] Core Web Vitals 목표 설정
+    - [x] Lighthouse 점수 목표 설정
+    - [x] 이미지 최적화 확인 가이드
+    - [x] 번들 크기 확인 가이드
+  - [x] 배포 가이드 문서화
+    - [x] 종합 배포 가이드 생성 (`docs/DEPLOYMENT.md`)
+    - [x] 단계별 배포 가이드 작성
+    - [x] 트러블슈팅 가이드 작성
