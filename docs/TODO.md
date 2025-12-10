@@ -391,7 +391,7 @@
   - [x] Sidebar "검색" 버튼 클릭 시 SearchModal 열기
   - [x] BottomNav "검색" 버튼 클릭 시 SearchModal 열기
 
-## Phase 13. 에러 핸들링 및 최적화
+## Phase 13. 최적화 작업
 
 - [x] 에러 핸들링
   - [x] Error Boundary 컴포넌트 생성 (`components/error-boundary.tsx`)
@@ -437,8 +437,45 @@
   - [x] 코드 포맷팅 (일관성 확인)
   - [x] 사용하지 않는 import 제거
   - [x] 타입 정의 정리
+- [x] 콘솔 로깅 최적화
+  - [x] `components/post/PostFeed.tsx`: 주석 정리 (사용하지 않는 GridPostFeed 언급 제거)
+  - [x] `components/post/CreatePostModal.tsx`: console.warn을 개발 환경에서만 출력하도록 수정
+  - [x] `components/post/post-modal.tsx`: console.error를 개발 환경에서만 출력하도록 수정
+  - [x] `hooks/use-view-mode.ts`: console.error를 개발 환경에서만 출력하도록 수정
+  - [x] `hooks/use-sync-user.ts`: console.error를 개발 환경에서만 출력하도록 수정
 
-## Phase 15. 배포
+## Phase 15. 게시물 뷰 모드 선택 기능
+
+- [x] 뷰 모드 타입 정의
+  - [x] `lib/types.ts`에 ViewMode 타입 추가
+- [x] 뷰 모드 상태 관리
+  - [x] `hooks/use-view-mode.ts` 생성 (localStorage 저장/로드)
+- [x] 뷰 모드 선택 UI
+  - [x] `components/post/view-mode-selector.tsx` 생성 (데스크탑 전용)
+  - [x] 상하 스크롤 / 좌우 스크롤 선택 버튼
+- [x] 좌우 스크롤 레이아웃
+  - [x] `components/post/HorizontalPostFeed.tsx` 생성
+  - [x] 가로 스크롤 컨테이너
+  - [x] `components/post/ScrollNavigation.tsx` 생성 (좌우 이동 버튼)
+  - [x] 키보드 네비게이션 (화살표 키)
+  - [x] 무한 스크롤 지원
+- [x] PostFeed 컴포넌트 수정
+  - [x] 뷰 모드에 따른 조건부 렌더링
+  - [x] 데스크탑에서만 뷰 모드 선택 기능 제공
+  - [x] 모바일/태블릿은 기존 상하 스크롤 유지
+  - [x] 뷰 모드 전환 시 애니메이션 적용 (animate-fade-in)
+  - [x] ViewModeSelector에 애니메이션 및 minHeight 추가
+  - [x] VerticalPostFeed 불필요한 div 래퍼 제거 (Fragment 사용)
+  - [x] HorizontalPostFeed의 layout 제약 벗어나기 (negative margin 활용)
+- [x] HorizontalPostFeed UX 개선
+  - [x] 오른쪽 그라데이션 오버레이 추가 (더 스크롤 가능함을 시각적으로 표시)
+  - [x] 스크롤 위치 감지 로직 추가 (오른쪽 끝 도달 시 그라데이션 숨김)
+  - [x] 게시물 간격 증가 (gap-4 → gap-6)
+  - [x] paddingRight 추가 (100px) - 다음 게시물의 일부만 보이도록 설정
+- [x] 스타일링
+  - [x] `app/globals.css`에 scrollbar-hide 유틸리티 클래스 추가
+
+## Phase 16. 배포
 
 - [ ] 배포 준비
   - [ ] 환경 변수 설정

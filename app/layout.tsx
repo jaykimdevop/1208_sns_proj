@@ -21,7 +21,7 @@ import { SyncUserProvider } from "@/components/providers/sync-user-provider";
 import { customKoKR } from "@/lib/clerk/localization";
 import { Toaster } from "@/components/ui/sonner";
 import { ErrorBoundary } from "@/components/error-boundary";
-import { OfflineBanner, OnlineBanner } from "@/components/offline-banner";
+import { OfflineBanner } from "@/components/offline-banner";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -85,7 +85,6 @@ export default function RootLayout({
             메인 콘텐츠로 건너뛰기
           </a>
           <OfflineBanner />
-          <OnlineBanner />
           <ErrorBoundary>
             <SyncUserProvider>
               <main id="main-content">

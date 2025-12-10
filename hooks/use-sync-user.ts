@@ -39,13 +39,17 @@ export function useSyncUser() {
         });
 
         if (!response.ok) {
-          console.error("Failed to sync user:", await response.text());
+          if (process.env.NODE_ENV === "development") {
+            console.error("Failed to sync user:", await response.text());
+          }
           return;
         }
 
         syncedRef.current = true;
       } catch (error) {
-        console.error("Error syncing user:", error);
+        if (process.env.NODE_ENV === "development") {
+          console.error("Error syncing user:", error);
+        }
       }
     };
 

@@ -93,7 +93,9 @@ export function PostModal({
           setComments(flatComments);
         }
       } catch (error) {
-        console.error("Error fetching comments:", error);
+        if (process.env.NODE_ENV === "development") {
+          console.error("Error fetching comments:", error);
+        }
       }
     };
 
@@ -147,7 +149,9 @@ export function PostModal({
       await navigator.clipboard.writeText(url);
       // 토스트는 PostCard에서 이미 구현됨
     } catch (error) {
-      console.error("Failed to copy URL:", error);
+      if (process.env.NODE_ENV === "development") {
+        console.error("Failed to copy URL:", error);
+      }
     }
   };
 

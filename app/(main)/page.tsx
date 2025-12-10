@@ -12,9 +12,9 @@
 
 import { Suspense } from "react";
 import { auth } from "@clerk/nextjs/server";
-import { PostFeed } from "@/components/post/PostFeed";
 import { PostCardSkeleton } from "@/components/post/PostCardSkeleton";
 import { createClerkSupabaseClient } from "@/lib/supabase/server";
+import { PostFeedClientWrapper } from "@/components/post/PostFeedClientWrapper";
 import type { PostsResponse } from "@/lib/types";
 
 async function getInitialPosts(): Promise<PostsResponse | null> {
@@ -173,16 +173,11 @@ function PostFeedWrapper() {
 async function PostFeedContent() {
   const initialPosts = await getInitialPosts();
 
-  return <PostFeed initialPosts={initialPosts || undefined} />;
+  return <PostFeedClientWrapper initialPosts={initialPosts || undefined} />;
 }
 
 export default function HomePage() {
   // 레이아웃에서 이미 스타일링을 처리하므로 PostFeedWrapper만 반환
-  // 페이지 진입 시 fade-in 애니메이션 적용
-  return (
-    <div className="animate-fade-in">
-      <PostFeedWrapper />
-    </div>
-  );
+  return <PostFeedWrapper />;
 }
 

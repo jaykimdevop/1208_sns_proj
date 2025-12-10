@@ -247,18 +247,22 @@ export function CreatePostModal({
             });
           }
         } else {
-          console.warn("Failed to fetch new post: HTTP", postsResponse.status);
+          if (process.env.NODE_ENV === "development") {
+            console.warn("Failed to fetch new post: HTTP", postsResponse.status);
+          }
         }
       } catch (fetchError) {
         // 네트워크 오류, 타임아웃 등은 무시 (게시물은 이미 생성됨)
-        if (fetchError instanceof Error) {
-          if (fetchError.name === "AbortError") {
-            console.warn("Timeout while fetching new post");
+        if (process.env.NODE_ENV === "development") {
+          if (fetchError instanceof Error) {
+            if (fetchError.name === "AbortError") {
+              console.warn("Timeout while fetching new post");
+            } else {
+              console.warn("Error fetching new post:", fetchError.message);
+            }
           } else {
-            console.warn("Error fetching new post:", fetchError.message);
+            console.warn("Unknown error fetching new post:", fetchError);
           }
-        } else {
-          console.warn("Unknown error fetching new post:", fetchError);
         }
         // 게시물 생성은 성공했으므로, 새 게시물 가져오기 실패는 무시하고 진행
       }
@@ -443,7 +447,7 @@ export function CreatePostModal({
             </div>
           )}
 
-          {/* 공유 버튼 */}
+          {/* 게시하기 버튼 */}
           {previewUrl && (
             <div className="px-4 pb-4">
               <button
@@ -461,7 +465,7 @@ export function CreatePostModal({
                     업로드 중...
                   </>
                 ) : (
-                  "🚀 공유하기"
+                  "🚀 게시하기"
                 )}
               </button>
             </div>

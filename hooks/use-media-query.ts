@@ -21,18 +21,19 @@ function getMatches(query: string): boolean {
 }
 
 export function useMediaQuery(query: string): boolean {
-  // 초기값을 즉시 계산 (클라이언트에서만)
-  const [matches, setMatches] = useState(() => getMatches(query));
-
-  // 현재 상태를 즉시 반환하는 함수 (클릭 핸들러 등에서 사용)
-  const getIsMatching = useCallback(() => getMatches(query), [query]);
+  // hydration mismatch 방지: SSR 시 false로 시작
+  const [matches, setMatches] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    // 클라이언트 마운트 완료 표시
+    setMounted(true);
+
     // SSR 환경에서는 window가 없으므로 early return
     if (typeof window === "undefined") return;
 
     const mediaQuery = window.matchMedia(query);
-    
+
     // 초기값 설정 (hydration 후 즉시 업데이트)
     setMatches(mediaQuery.matches);
 
@@ -50,7 +51,8 @@ export function useMediaQuery(query: string): boolean {
     };
   }, [query]);
 
-  return matches;
+  // hydration 완료 전에는 false 반환
+  return mounted ? matches : false;
 }
 
 /**

@@ -5,12 +5,15 @@
  * @description 게시물 피드 컴포넌트
  *
  * 게시물 목록을 표시하고 무한 스크롤을 통해 페이지네이션을 지원합니다.
- * Intersection Observer API를 사용하여 하단 도달 시 자동으로 다음 페이지를 로드합니다.
- * 전역 상태(jotai)를 사용하여 새 게시물이 즉시 피드에 표시됩니다.
+ * 뷰 모드에 따라 상하 스크롤 또는 좌우 스크롤 중 하나를 렌더링합니다.
+ * 데스크탑에서만 뷰 모드 선택 기능을 제공하며, 모바일/태블릿은 기본 상하 스크롤만 사용합니다.
  *
  * @dependencies
  * - components/post/PostCard: 게시물 카드 컴포넌트
  * - components/post/PostCardSkeleton: 로딩 스켈레톤
+ * - components/post/HorizontalPostFeed: 좌우 스크롤 피드
+ * - components/post/ViewModeSelector: 뷰 모드 선택 UI
+ * - hooks/use-view-mode: 뷰 모드 상태 관리
  * - app/api/posts/route: 게시물 목록 조회 API
  * - lib/types: PostsResponse, PostWithStats
  * - states/posts-atom: 전역 게시물 상태
@@ -20,8 +23,12 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import { useAtom } from "jotai";
 import { PostCard } from "./PostCard";
 import { PostCardSkeleton } from "./PostCardSkeleton";
+import { HorizontalPostFeed } from "./HorizontalPostFeed";
+import { ViewModeSelector } from "./view-mode-selector";
 import { postsAtom, type PostItem } from "@/states/posts-atom";
 import { handleApiError, handleFetchError, getUserFriendlyMessage } from "@/lib/utils/error-handler";
+import { useViewMode } from "@/hooks/use-view-mode";
+import { useMediaQuery } from "@/hooks/use-media-query";
 import type { PostsResponse } from "@/lib/types";
 
 interface PostFeedProps {
@@ -29,14 +36,14 @@ interface PostFeedProps {
   userId?: string; // 프로필 페이지용 (선택적)
 }
 
-export function PostFeed({ initialPosts, userId }: PostFeedProps) {
+// 상하 스크롤 피드 컴포넌트 (기존 로직)
+function VerticalPostFeed({ initialPosts, userId }: PostFeedProps) {
   // 전역 상태 사용
   const [posts, setPosts] = useAtom(postsAtom);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(initialPosts?.hasMore ?? true);
   const [offset, setOffset] = useState(initialPosts?.data?.length || 0);
   const [error, setError] = useState<string | null>(null);
-  const [isInitialized, setIsInitialized] = useState(false);
   const observerTarget = useRef<HTMLDivElement>(null);
 
   // 게시물 삭제 핸들러
@@ -47,13 +54,18 @@ export function PostFeed({ initialPosts, userId }: PostFeedProps) {
     [setPosts]
   );
 
-  // 초기 데이터로 전역 상태 초기화 (한 번만)
+  // 컴포넌트 마운트 시 초기 데이터로 전역 상태 초기화 및 스크롤 위치 리셋
   useEffect(() => {
-    if (!isInitialized && initialPosts?.data) {
+    if (initialPosts?.data) {
       setPosts(initialPosts.data as PostItem[]);
-      setIsInitialized(true);
+      setOffset(initialPosts.data.length);
+      setHasMore(initialPosts.hasMore ?? true);
     }
-  }, [initialPosts, isInitialized, setPosts]);
+
+    // 스크롤 위치를 맨 위로 리셋
+    window.scrollTo({ top: 0, behavior: "instant" });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialPosts]); // initialPosts 변경 시에도 실행
 
   // AbortController ref (요청 취소용)
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -164,7 +176,7 @@ export function PostFeed({ initialPosts, userId }: PostFeedProps) {
   };
 
   return (
-    <div className="py-8">
+    <>
       {/* 게시물 목록 */}
       {posts.length === 0 && !loading && !error && (
         <div className="text-center py-16">
@@ -228,7 +240,58 @@ export function PostFeed({ initialPosts, userId }: PostFeedProps) {
           </p>
         </div>
       )}
-    </div>
+    </>
+  );
+}
+
+// 메인 PostFeed 컴포넌트 (뷰 모드에 따라 분기)
+export function PostFeed({ initialPosts, userId }: PostFeedProps) {
+  const { viewMode } = useViewMode();
+  const isDesktop = useMediaQuery("(min-width: 1024px)");
+  const [, setPosts] = useAtom(postsAtom);
+
+  // 데스크탑에서만 뷰 모드 선택 기능 제공
+  // 모바일/태블릿은 항상 상하 스크롤 사용
+  const effectiveViewMode = isDesktop ? viewMode : "vertical";
+
+  // 뷰 모드 변경 시 전역 상태를 초기 데이터로 리셋
+  useEffect(() => {
+    if (initialPosts?.data) {
+      setPosts(initialPosts.data as PostItem[]);
+    }
+  }, [effectiveViewMode, initialPosts, setPosts]);
+
+  return (
+    <>
+      {/* 뷰 모드 선택 UI (데스크탑만) */}
+      {isDesktop && (
+        <div className="animate-fade-in" style={{ minHeight: '88px' }}>
+          <ViewModeSelector />
+        </div>
+      )}
+
+      {/* 뷰 모드에 따른 피드 렌더링 */}
+      {effectiveViewMode === "vertical" ? (
+        <div key="vertical" className="animate-fade-in">
+          <VerticalPostFeed initialPosts={initialPosts} userId={userId} />
+        </div>
+      ) : (
+        <div
+          key="horizontal"
+          className="animate-fade-in"
+          style={{
+            minHeight: '400px',
+            // layout의 max-w-[630px] 제약을 벗어나기 위해 negative margin 사용
+            // 122px = 244px(사이드바) / 2
+            marginLeft: isDesktop ? "calc(-50vw + 50% + 122px)" : "calc(-50vw + 50%)",
+            marginRight: isDesktop ? "calc(-50vw + 50% + 122px)" : "calc(-50vw + 50%)",
+            width: isDesktop ? "calc(100vw - 244px)" : "100vw",
+          }}
+        >
+          <HorizontalPostFeed initialPosts={initialPosts} userId={userId} />
+        </div>
+      )}
+    </>
   );
 }
 

@@ -387,3 +387,12 @@ export interface SearchResponse {
   error?: string;
 }
 
+// ============================================
+// 뷰 모드 타입
+// ============================================
+
+/**
+ * 게시물 피드 뷰 모드 타입
+ */
+export type ViewMode = "vertical" | "horizontal";
+
